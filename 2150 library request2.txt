@@ -1,0 +1,67 @@
+this document covers how to work with the 'request2' library.
+This library is used to access the $_REQUEST object of PHP to get values of 'POST' or values of 'GET'
+
+The main benefit of this library is that all the data is cleaned before returning the value. 
+So always use this library to access Request values so that you can prevent XSS attacks.
+
+request2.get
+---------------------
+command: env.get
+attributes::
+	main/unnamed (compulsory)=<some request key> . The main/unnamed attribute takes a key which you are expecting to exist in $_REQUEST object
+
+
+[request2.get 'request_body' /]
+if the key='request_body' it returns back file_get_contents('php://input')
+
+[request2.get 'post_json' /]
+if the key='post_json' it returns back 
+
+$post = $_POST;
+array_walk_recursive(
+	$post,
+	function(&$item,$key){
+		$item=xss_clean($item);
+	}
+);
+return json_encode($post);
+
+
+[request2.get "some key" /]
+if the key='some key' it returns back 
+
+Looks at the $_REQUEST and checks for the key.
+
+If the key is an array then it cleans each element and returns the array
+If the key is not an array then it cleans the value and returns the value
+
+[request2.get "pname" /]
+will look at the $_REQUEST object and return the value of the key 'pname'
+
+
+
+request2.dump
+------------------------
+[request2.dump /] will dump the complete request object
+[request2.dump somekey /] will get the value and then dump it for debugging purposes
+
+this uses php var_dump
+
+request2.echo
+-------------------
+[request2.echo /] will echo the complete env
+[request2.echo somekey /] will get the value and then echo it for debugging purposes
+
+this uses php echo
+
+
+
+request2.<somekey> 
+---------------------
+request keys can be acessed using the service request2.<somekey>
+It is just a shortform of  [request2.get "some key" /]
+
+
+
+So [request2.pname /] is equivalent [request2.get "pname" /]
+

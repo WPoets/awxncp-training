@@ -1,0 +1,356 @@
+<h1>arr_each.map - Array Iteration and Transformation Service</h1>
+
+<h2>Overview</h2>
+arr_each.map provides a powerful way to iterate over arrays and transform their contents. It creates a context for each item, allowing you to access and modify values, keys, and other metadata during iteration.
+
+<h2>Basic Syntax</h2>
+[code.dump]
+<pre>
+[arr_each.map.@context main=<array>]
+    transformation code using @context
+[/arr_each.map.@context]
+</pre>
+[/code.dump]
+
+<h2>Key Features</h2>
+<ul>
+<li><strong>Context Operations</strong>
+    <ul>
+    <li>@context.map - Transform values using services</li>
+    <li>@context.modify - Update keys and values</li>
+    <li>@context.discard - Remove items from result</li>
+    </ul>
+</li>
+<li><strong>Context Information</strong>
+    <ul>
+    <li>@context.info.value - Current item value</li>
+    <li>@context.info.key - Current item key</li>
+    <li>@context.info.index - Current iteration index (0-based)</li>
+    <li>@context.info.count - Total number of items</li>
+    <li>@context.info.source - Original source array</li>
+    </ul>
+</li>
+<li><strong>Array Input Methods</strong>
+    <ul>
+    <li>main=<array> - Direct array input</li>
+    <li>arr.@=<service> - Get array from service</li>
+    <li>from_path=<path> - Get array from path</li>
+    <li>key.prefix=<value> - Add key-value pairs</li>
+    <li>Content within tags - Build array using array_builder</li>
+    </ul>
+</li>
+</ul>
+
+<h2>Quick Examples</h2>
+
+<h3>1. Transform Values</h3>
+[code.dump]
+<pre>
+// Double all numbers in array
+[arr_each.map.@num main={numbers}]
+    [@num.map s.@='math.solve' s.main='{@num.info.value} * 2' /]
+[/arr_each.map.@num]
+
+// Transform strings
+[arr_each.map.@str main={strings}]
+    [@str.map s.@='str.create' s.main='{@str.info.value}' s.case='upper' /]
+[/arr_each.map.@str]
+</pre>
+[/code.dump]
+
+<h3>2. Filter Items</h3>
+[code.dump]
+<pre>
+// Keep only active items
+[arr_each.map.@item main={items}]
+    [cond.block.@status cond.@=str.comp.neq cond.main={@item.info.value.status} cond.with='active']
+        [@status.then]
+            [@item.discard /]
+        [/@status.then]
+    [/cond.block.@status]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h3>3. Modify Keys and Values</h3>
+[code.dump]
+<pre>
+// Add prefix to keys and enrich values
+[arr_each.map.@item main={items}]
+    [str.create 'prefix_{@item.info.key}' o.set=new_key /]
+    [@item.modify 
+        key={new_key}
+        value="{'original': '{@item.info.value}', 'index': {@item.info.index}}"
+    /]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h3>4. Get Array from Service</h3>
+[code.dump]
+<pre>
+// Use service to get array
+[arr_each.map.@item 
+    arr.@='arr_items.get.slice' 
+    arr.from_path='active_array'
+    arr.from_key='key1'
+    arr.to_key='key2'
+]
+    [@item.map s.@='format.item' s.main={@item.info.value} /]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h3>5. Using Array Metadata</h3>
+[code.dump]
+<pre>
+// Build item descriptions using metadata
+[arr_each.map.@item main={items}]
+    [@item.map 
+        s.@='str.create' 
+        s.main='Item {@item.info.index} of {@item.info.count}: {@item.info.value.name}'
+    /]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h3>6. Build Array in Content</h3>
+[code.dump]
+<pre>
+// Build array using content
+[arr_each.map.@item]
+    [@new name='First' value=int:1 /]
+    [@new name='Second' value=int:2 /]
+    [@new name='Third' value=int:3 /]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h2>Common Use Cases</h2>
+<ul>
+<li>Transform array values using services</li>
+<li>Filter out unwanted items</li>
+<li>Rename array keys</li>
+<li>Complex data transformations</li>
+<li>Chaining multiple transformations</li>
+</ul>
+
+
+
+<h1>arr_each.map Service Examples</h1>
+
+<h2>1. Basic Array Transformation</h2>
+
+<h3>Code</h3>
+[code.dump]
+<pre>
+[env.set_array numbers]
+  [@new _value=int:10 /]
+  [@new _value=int:20 /]
+  [@new _value=int:30 /]
+[/env.set_array]
+
+[arr_each.map.@num main={numbers} o.dump=yes]
+  [@num.map 
+    s.@='math.solve' 
+    s.main='{@num.info.value} * 2'
+  /]
+[/arr_each.map.@num]
+</pre>
+[/code.dump]
+
+<h3>Expected Output</h3>
+<pre>
+array(3) {
+  [0]=>int(20)
+  [1]=>int(40)
+  [2]=>int(60)
+}
+</pre>
+
+<h3>Actual Output</h3>
+[env.set_array numbers]
+  [@new _value=int:10 /]
+  [@new _value=int:20 /]
+  [@new _value=int:30 /]
+[/env.set_array]
+
+[arr_each.map.@num main={numbers} o.dump=yes]
+  [@num.map 
+    s.@='math.solve' 
+    s.main='{@num.info.value} * 2'
+  /]
+[/arr_each.map.@num]
+
+
+<h2>2. Complex Item Processing</h2>
+
+<h3>Code</h3>
+[code.dump]
+<pre>
+[env.set_array products]
+  [item1 name='Product A' price=int:100 status='active' /]
+  [item2 name='Product B' price=int:200 status='inactive' /]
+  [item3 name='Product C' price=int:150 status='active' /]
+[/env.set_array]
+
+[arr_each.map.@product main={products} o.dump=yes]
+   [cond.block.@status cond.@=str.comp.neq cond.main={@product.info.value.status} cond.with='active']
+       [@status.then]
+           [@product.discard /]
+       [/@status.then]
+   [/cond.block.@status]
+ 
+   [str.create "ACTIVE_{@product.info.key}" o.set=new_key /]
+ 
+   [@product.modify 
+       key={new_key}
+       value="{'name': '{@product.info.value.name}', 'price': {@product.info.value.price}, 'processed': true}"
+   /]
+[/arr_each.map.@product]
+</pre>
+[/code.dump]
+
+<h3>Expected Output</h3>
+<pre>
+array(2) {
+  ["ACTIVE_item1"]=>array(3) {
+    ["name"]=>"Product A"
+    ["price"]=>int(100)
+    ["processed"]=>bool(true)
+  }
+  ["ACTIVE_item3"]=>array(3) {
+    ["name"]=>"Product C"
+    ["price"]=>int(150)
+    ["processed"]=>bool(true)
+  }
+}
+</pre>
+
+<h3>Actual Output</h3>
+[env.set_array products]
+  [item1 name='Product A' price=int:100 status='active' /]
+  [item2 name='Product B' price=int:200 status='inactive' /]
+  [item3 name='Product C' price=int:150 status='active' /]
+[/env.set_array]
+
+[arr_each.map.@product main={products} o.dump=yes]
+	[cond.true cond.@=str.comp.neq cond.main={@product.info.value.status} cond.with='active']
+	   [@product.discard /]
+	[/cond.true]
+  
+  [str.create "ACTIVE_{@product.info.key}" o.set=new_key /]
+  
+  [@product.modify 
+    key={new_key}
+    value="'name': '{@product.info.value.name}', 'price': {@product.info.value.price}, 'processed': true"
+  /]
+[/arr_each.map.@product]
+
+<h2>3. Service Chaining</h2>
+
+<h3>Code</h3>
+[code.dump]
+<pre>
+[env.set_array texts]
+  [@new _value=' hello ' /]
+  [@new _value=' world ' /]
+[/env.set_array]
+
+[arr_each.map.@text main={texts} o.dump=yes]
+  // First trim whitespace
+  [@text.map 
+    s.@='str.create'
+    s.main='{@text.info.value}'
+    s.trim='yes'
+  /]
+  
+  // Then uppercase
+  [@text.map 
+    s.@='str.create'
+    s.main='{@text.info.value}'
+    s.case='upper'
+  /]
+  
+  // Finally modify the key
+  [str.create "word_{@text.info.index}" o.set=new_key /]
+  [@text.modify key={new_key} /]
+[/arr_each.map.@text]
+</pre>
+[/code.dump]
+
+<h3>Expected Output</h3>
+<pre>
+array(2) {
+  ["word_0"]=>"HELLO"
+  ["word_1"]=>"WORLD"
+}
+</pre>
+
+<h3>Actual Output</h3>
+[env.set_array texts]
+  [@new _value=' hello ' /]
+  [@new _value=' world ' /]
+[/env.set_array]
+
+[arr_each.map.@text main={texts} o.dump=yes]
+  // First trim whitespace
+  [@text.map 
+    s.@='str.create'
+    s.main='{@text.info.value}'
+    s.trim='yes'
+  /]
+  
+  // Then uppercase
+  [@text.map 
+    s.@='str.create'
+    s.main='{@text.info.value}'
+    s.case='upper'
+  /]
+  
+  // Finally modify the key
+  [str.create "word_{@text.info.index}" o.set=new_key /]
+  [@text.modify key={new_key} /]
+[/arr_each.map.@text]
+
+
+
+<h2>4. Context Information Access</h2>
+
+<h3>Code</h3>
+[code.dump]
+<pre>
+[env.set_array items]
+  [@new name='First Item' value=int:1 /]
+  [@new name='Second Item' value=int:2 /]
+[/env.set_array]
+
+[arr_each.map.@item main={items} o.dump=yes]
+  [@item.map
+    s.@='str.create'
+    s.main='Item {$item.info.index} of {$item.info.count}: {$item.info.value.name}'
+  /]
+[/arr_each.map.@item]
+</pre>
+[/code.dump]
+
+<h3>Expected Output</h3>
+<pre>
+array(2) {
+  [0]=>"Item 0 of 2: First Item"
+  [1]=>"Item 1 of 2: Second Item"
+}
+</pre>
+
+<h3>Actual Output</h3>
+[env.set_array items]
+  [@new name='First Item' value=int:1 /]
+  [@new name='Second Item' value=int:2 /]
+[/env.set_array]
+
+[arr_each.map.@item main={items} o.dump=yes]
+  [@item.map
+    s.@='str.create'
+    s.main='Item {@item.info.index} of {@item.info.count}: {@item.info.value.name}'
+  /]
+[/arr_each.map.@item]

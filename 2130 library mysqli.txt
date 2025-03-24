@@ -1,0 +1,218 @@
+The 'mysqli' library allows you to query the mysql database. In a separate doc will give you the table structures. 
+In this we will understand the services available to fire queries. Results of a query are a php associative array
+the document covers single queries.
+The service is
+mysqli.<action>.<child action if any>
+
+The content is parsed before the query is fired
+This uses the single query ($mysqli->query())so if you have multiple statements this service will give an error
+This does not close the mysqli object after the operation. Hence calling a Stored Procedure or doing anything which leaves a residue may corrupt future queries
+
+mysqli.cud
+------------------
+Allows you to fire a create, update or delete query which is in the content. 
+
+[mysqli.cud]
+	insert into table1(field1,field2) values ('a','b')
+[/mysqli.cud]
+
+The above is not expected to return any value.
+
+
+mysqli.fetch.rows
+------------------
+Used to fire a select query which will give back multiple rows
+
+
+[mysqli.fetch.rows]
+		Select ID,post_title from wp_posts limit 3
+[/mysqli.fetch.rows]
+
+The reply is an assciative array of the type below. You must use an outputter to manage the reply else the output will be added to the output stream.
+
+
+reply
+	[sql]= the query which was fired
+	[rows]= An associative array of the rows returned. Will be null if no rows were returned
+	[found_rows]=count(rows) . The number of rows in the rows array
+	[message] = No rows found | x Rows Found
+
+Output of Query above::
+[
+    "status"     => string(7) "success"
+    "rows"       =>  array(3) 
+        [
+            0 =>  array(2) 
+                [
+                    "ID"         => string(2) "14"
+                    "post_title" => string(12) "pages layout"
+                ]
+            1 =>  array(2) 
+                [
+                    "ID"         => string(2) "26"
+                    "post_title" => string(4) "home"
+                ]
+            2 =>  array(2) 
+                [
+                    "ID"         => string(2) "32"
+                    "post_title" => string(18) "temp_modules-check"
+                ]
+        ]
+    "message"    => string(12) "3 rows found"
+    "found_rows" => int(3)
+    "sql"        => string(45) "Select ID,post_title from wp_posts limit 3"
+]
+
+
+
+mysqli.fetch.row
+------------------
+It is to be used when you are expecting 0 or 1 row.
+
+[mysqli.fetch.row]
+	Select  ID,post_title from wp_posts limit 3
+[/mysqli.fetch.row]
+
+Even if the query returns back more than 1 row the reply has only 1 row.
+
+The reply is an assciative array of the type below
+
+reply
+	[sql]= the query which was fired
+	[row]= An associative array of the row returned. Will be null if no row was returned
+	[found_rows]=count(items) . The number of items in the row array. Hence it is basically the number of columns in the row
+	[message] = No rows found | x Rows Found
+
+[
+    "status"     => string(7) "success"
+    "row"        =>  array(2) 
+        [
+            "ID"         => string(2) "14"
+            "post_title" => string(12) "pages layout"
+        ]
+    "message"    => string(13) "No data found"
+    "found_rows" => int(2)
+    "sql"        => string(46) "
+	Select  ID,post_title from wp_posts limit 3
+"
+]
+
+mysqli.fetch.exactly_one_row
+------------------------------------------------	
+It is to be used when you are expecting exactly 1 row.
+If exactly 1 row is not returned the service throws an exception
+
+[mysqli.fetch.exactly_one_row]
+	Select 1,2;
+[/mysqli.fetch.exactly_one_row]
+
+The reply is an assciative array of the type below
+
+reply
+	[sql]= the query which was fired
+	[row]= An associative array of the row returned.
+	[found_rows]=count(rows) . The number of rows in the rows array
+	[message] = One Row Found
+
+
+[
+    "status"     => string(7) "success"
+    "message"    => string(13) "One row found"
+    "found_rows" => int(1)
+    "row"        =>  array(2) 
+        [
+            1 => string(1) "1"
+            2 => string(1) "2"
+        ]
+    "sql"        => string(13) "
+	Select 1,2
+"
+]
+
+
+
+mysqli.fetch.col
+------------------------------------------------	
+It is to be used when you are expecting exactly 1 column. It creates an error if the returned dataset has more than 1 column
+
+
+[mysqli.fetch.col]
+	Select post_id from wp_posts limit 10
+[/mysqli.fetch.col]
+
+reply
+	[sql]= the query which was fired
+	[col]= An  array of the values returned. The col name is not there
+	[found_rows]=count(rows) . The number of rows in the rows array
+	[message] = No rows found | x Rows Found
+	
+	
+mysqli.fetch.scalar
+--------------------------	
+It is to be used when you are expecting exactly 1 row and 1 column.
+
+
+[mysqli.fetch.scalar]
+	Select post_id from wp_posts limit 1
+[/mysqli.fetch.scalar]
+
+reply
+	[sql]= the query which was fired
+	[scalar]= The value returned
+	[found_rows]=count(rows) . The number of rows in the rows array
+	[message] = No rows found | x Rows Found
+
+[
+    "status"     => string(7) "success"
+    "scalar"     => string(1) "1"
+    "message"    => string(16) "One result found"
+    "found_rows" => int(1)
+    "sql"        => string(11) "
+	Select 1
+"
+]
+
+
+mysqli.fetch.count
+---------------------------------
+It is to be used when you are only interested in count which was returned.
+You should write the query such that it returns one numeric value.
+
+[mysqli.fetch.count o.set=dataout]
+		Select count(1) from wp_posts
+[/mysqli.fetch.count]
+
+reply
+	[sql]= the query which was fired
+	[count]= The value returned
+	[found_rows]=count(rows) . The number of rows in the rows array
+	[message] = No rows found | x Rows Found
+
+
+
+[
+    "status"     => string(7) "success"
+    "count"      => string(5) "67395"
+    "message"    => string(16) "One result found"
+    "found_rows" => int(1)
+    "sql"        => string(33) "
+		Select count(1) from wp_posts
+"
+]
+
+
+mysqli.fetch.grouped
+---------------------------------
+Ignore this at present. Will explain later
+
+
+mysqli.fetch.meta_keys
+-----------------------------
+Ignore this at present. Will explain later
+
+
+
+
+
+
+

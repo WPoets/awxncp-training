@@ -1,0 +1,391 @@
+/* Tab container styles */
+.awesome-tab-buttons {
+    display: flex;
+    border-bottom: 2px solid #2271b1;
+    margin-bottom: 0;
+    gap: 4px;
+    padding: 0 4px;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Individual tab button styles */
+.awesome-tab-button {
+    padding: 12px 20px;
+    border: 2px solid transparent;
+    background: #f0f0f0;
+    cursor: pointer;
+    margin-bottom: -2px;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.2s ease;
+    color: #555;
+    font-weight: 500;
+}
+
+.awesome-tab-button:hover {
+    background: #fff;
+    border-color: #2271b1;
+    border-bottom-color: transparent;
+    color: #2271b1;
+}
+
+.awesome-tab-button.active {
+    background: #fff;
+    border-color: #2271b1;
+    border-bottom-color: #fff;
+    color: #2271b1;
+}
+
+.awesome-tab-button-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.awesome-tab-button .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
+/* Tab content styles */
+.awesome-tab-content {
+    padding: 20px;
+    background: #fff;
+    border: 2px solid #2271b1;
+    border-top: none;
+    position: relative;
+    min-height: 200px;
+    margin-top: -2px;
+}
+
+/* Field visibility styles */
+[data-active-tab] .awesome-field {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(10px);
+}
+
+[data-active-tab] .awesome-field.awesome-field-active {
+    opacity: 1;
+    position: relative;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Field styles */
+.awesome-field {
+    margin-bottom: 24px;
+    padding: 16px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.awesome-field .components-base-control {
+    width: 100%;
+}
+
+.awesome-field input[type="number"] {
+    width: 120px !important;
+    text-align: right;
+}
+
+/* Inner blocks field styles */
+.awesome-innerblocks-field {
+    padding: 16px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.awesome-innerblocks-field > .components-base-control__label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.awesome-innerblocks-field .block-editor-inner-blocks {
+    padding: 16px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    background: #fff;
+}
+
+/* Attribute repeater styles */
+.awesome-attribute-inputs {
+    display: grid;
+    grid-template-columns: 200px 120px 1fr auto;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.awesome-attribute-row {
+    margin-bottom: 16px;
+    background: #fff;
+}
+
+.awesome-attributes-container {
+    margin: 20px 0;
+}
+
+.awesome-attribute-remove {
+    padding: 0 8px !important;
+    margin-top: 28px !important;
+    background: #dc3232;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.awesome-attribute-remove:hover {
+    background: #dc2323;
+}
+
+.awesome-add-attribute {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px !important;
+    padding: 8px 12px;
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.awesome-add-attribute:hover {
+    background: #135e96;
+}
+
+/* Small number field */
+.awesome-small-number input[type="number"] {
+    width: 80px !important;
+    text-align: right;
+}
+
+/* Select field */
+.awesome-field .components-select-control__input {
+    width: 100%;
+}
+
+/* Toggle field */
+.awesome-field .components-toggle-control {
+    margin-bottom: 0;
+}
+
+.awesome-field .components-toggle-control .components-base-control__field {
+    margin-bottom: 0;
+}
+
+/* Animation for tab switching */
+.awesome-field {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 782px) {
+    .awesome-attribute-inputs {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .awesome-attribute-remove {
+        margin-top: 0 !important;
+        width: 100%;
+        padding: 8px !important;
+    }
+
+    .awesome-tab-button {
+        padding: 8px 12px;
+    }
+}
+
+/* Error states */
+.awesome-field .components-base-control.has-error input {
+    border-color: #dc3232;
+}
+
+.awesome-field .components-base-control.has-error .components-base-control__help {
+    color: #dc3232;
+}
+
+/* Hover effects */
+.awesome-field:hover {
+    border-color: #2271b1;
+}
+
+/* Focus states */
+.awesome-field .components-base-control input:focus,
+.awesome-field .components-base-control select:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Textarea field styles */
+.awesome-textarea-field {
+    margin-bottom: 16px;
+}
+
+.awesome-textarea-field textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.awesome-textarea-field textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.awesome-textarea-field .components-base-control__label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Title field styles */
+.awesome-title-field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* Purpose field styles */
+.awesome-purpose-field textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+/* Query field styles */
+.awesome-query-field textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: monospace;
+}
+
+/* Focus states */
+.awesome-title-field input:focus,
+.awesome-purpose-field textarea:focus,
+.awesome-query-field textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+/* Date field styles */
+.awesome-date-field {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.awesome-date-field-label {
+    margin-bottom: 8px;
+}
+
+.awesome-date-field-input input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #fff;
+}
+
+.awesome-date-field-input input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+
+.awesome-date-picker-popover {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #e2e4e7;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+/* Additional styles for the WordPress date picker */
+.awesome-date-picker-popover .components-datetime__date {
+    padding: 8px;
+}
+
+.awesome-date-picker-popover .components-datetime__time {
+    display: none;
+}
+
+/* Service field styles */
+.awesome-service-field input {
+    font-family: monospace;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.awesome-service-field .components-base-control__help {
+    margin-top: 4px;
+    font-style: italic;
+    color: #757575;
+}
+
+/* Code field styles */
+.awesome-code-field textarea {
+    font-family: monospace;
+    width: 100%;
+    min-height: 200px;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+    resize: vertical;
+    line-height: 1.4;
+    tab-size: 4;
+}
+
+/* Environment path field styles */
+.awesome-env-path-field input {
+    font-family: monospace;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.awesome-env-path-field .components-base-control__help {
+    margin-top: 4px;
+    font-style: italic;
+    color: #757575;
+}
+
+/* Common focus states */
+.awesome-service-field input:focus,
+.awesome-code-field textarea:focus,
+.awesome-env-path-field input:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: none;
+}
+

@@ -1,0 +1,79 @@
+/* Tab buttons */
+.awesome-tab-buttons {
+    display: flex;
+    border-bottom: 1px solid #e2e4e7;
+    margin-bottom: 0;
+}
+
+.awesome-tab-button {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+
+.awesome-tab-button.active {
+    border: 1px solid #e2e4e7;
+    border-bottom: 1px solid #fff;
+    background: #fff;
+}
+
+/* Tab content */
+.awesome-tabs-content {
+    background: #fff;
+    border: 1px solid #e2e4e7;
+    border-top: none;
+}
+
+.awesome-tab-panel {
+    padding: 20px;
+}
+
+/* Field styles */
+.awesome-field {
+    margin-bottom: 24px;
+}
+
+.awesome-field .components-base-control {
+    width: 100%;
+}
+
+/* Small number field */
+.awesome-field input[type="number"] {
+    width: 80px !important;
+    text-align: right;
+}
+
+.awesome-tab-button-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.awesome-tab-button .components-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.awesome-tab-button-text {
+    line-height: 20px;
+}
+
+/* Query field specific styles */
+.awesome-query-field textarea {
+    font-family: monospace;
+    min-height: 150px;
+}
+
+/* Service field specific styles */
+.awesome-service-field input {
+    font-family: monospace;
+}
+
+/* Inner blocks field styles */
+.awesome-inner-blocks {
+    border: 1px solid #e2e4e7;
+    padding: 20px;
+    margin-top: 10px;
+}

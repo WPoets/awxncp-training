@@ -1,0 +1,205 @@
+This document covers the common errors made while generating code and also the best practices while generating code
+
+Artifact
+-----------------
+Always generate code as an artifact. Inline code is very difficult to consume
+
+Shortcode with Shortcode
+---------------------------------
+
+set_array
+---------------
+[arr.create out:@template.set=cities]
+[/arr.create]
+
+
+referencing variables
+-------------------------
+I have observed that sometimes you refer to the variables wrongly. you set to a variable and use a different variable
+
+eg:
+
+[arr.create out:@template.set="template.cities"]
+[/arr.create]
+the above will create a variable called template.cities
+
+
+[str.get cities /]
+the above reference is wrong.
+
+
+Not trapping the output
+---------------------------
+All the services which i have given i have provided you what the service replies with. The reply can be handled in the following ways
+
+Incase the reply is an empty string '' then you can ignore it.
+eg: [env.set x=1 /]
+
+
+In all other cases you must handle the reply
+
+a) Incase you want to add the output to the output stream do nothing. It will get added to the output stream 
+b) Incase there is an output but you have not utility value of it you can use the outputter o.destroy to destroy the value
+c) Incase you want to store the value use o.set or o.merge_with
+d) Incase you are debugging then use o.dump, o.die
+
+Remember o.echo,o.console,o.log retain the value so it has to still be handled
+
+
+shortcode within a shortcode
+------------------------------
+Sometimes you use shortcode within a shortcode. This is wrong syntax
+
+so 
+[env.set x=[env.get y] /] is worng syntax and will not get parsed correctly
+
+There are two ways to handle this scenario.
+
+incase you are trying to get a value from the environment you can use {}
+
+[env.set x=[env.get y] /] can be correctly written as 
+
+[env.set x={y} /]
+
+
+incase you are trying to run a shortcode then you will have to write the shortcode separately and save it and then access it.
+
+[env.set x=[esc.str y] /] can be correctly written as 
+
+[esc.str y o.set=escaped_y/]
+[env.set x={escaped_y} /]
+
+
+Queries with variables
+------------------------
+Wherever we have queries with user variables it is preferable to use a multi query and set mysql variable to the input variables. This way the esc is stronger and xss attacks can be prevented
+
+  [mysqli.fetch.rows]
+    SELECT p.ID, p.post_title, p.post_excerpt, p.post_date
+    FROM wp_posts p
+    INNER JOIN wp_term_relationships tr ON p.ID = tr.object_id
+    INNER JOIN wp_term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+    INNER JOIN wp_terms t ON tt.term_id = t.term_id
+    WHERE t.slug = '[esc.str request.category /]'
+    AND p.post_type = 'post'
+    AND p.post_status = 'publish'
+    ORDER BY p.post_date DESC
+    LIMIT 5
+  [/mysqli.fetch.rows]
+  
+  The above has user variables which are escaped but may still slip through xss attacks
+  
+  
+   [mysqli.multi.fetch.rows]
+    SET @category = [esc.str request.category /];
+    SET @post_type = 'post';
+    SET @post_status = 'publish';
+
+    SELECT p.ID, p.post_title, p.post_excerpt, p.post_date
+    FROM wp_posts p
+    INNER JOIN wp_term_relationships tr ON p.ID = tr.object_id
+    INNER JOIN wp_term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+    INNER JOIN wp_terms t ON tt.term_id = t.term_id
+    WHERE t.slug = @category
+    AND p.post_type = @post_type
+    AND p.post_status = @post_status
+    ORDER BY p.post_date DESC
+    LIMIT 5;
+  [/mysqli.multi.fetch.rows]
+
+This is a preferred approach. This is more tighter and makes xss attacks really difficult
+
+
+mysql syntax issues
+----------------------
+Mysql does not allow variables in limits
+
+   [mysqli.multi.fetch.rows]
+    SET @limit = 5;
+
+    SELECT * 
+    FROM wp_posts 
+    LIMIT @limit;
+  [/mysqli.multi.fetch.rows]
+
+is syntax wrong as mysql does not allow variables in limit value.
+
+services which take values and services which take an env path
+-------------------------------------------------------------
+There are some services which take values. And some take a path. Sometimes you get confused. Be careful of the correct approach
+
+eg: 
+[esc.str <path> /] takes a path and not a value
+
+[int.create <value> /] takes a value and not a path
+
+main/unnamed attributes
+---------------------------
+Whenever you use an unnamed attribute please enclose with double quotes or no quotes at all if it has no spaces. Single quotes is not allowed
+
+[str.create hello /] is valid
+
+[str.create "hello" /] is valid
+
+[str.create 'hello' /] is not valid and will give an error
+
+attribute values must be typecasted
+------------------------------------------
+attribute values must be typecasted except when it is a string. 
+
+[env.set_array hello 
+	age=int:1 name=vikas is_employee=bool:false salary=num:5000.23 roles=comma:admin,user,developer 
+/]
+
+
+  [template.set_array employee
+    name="str:{{request2.get name}}"
+    age="int:{{int.create {{request2.get age}} }}"
+    position="str:{{request2.get position}}"
+    salary="num:{{num.create {{request2.get salary}} }}"
+  /]
+  
+  
+Nested Curly Braces are not allowed
+------------------------------------------
+Curly braces within curly braces are not allowed.
+
+[env.set person2.nameage="{person.{name}}"/] is invalid
+
+[env.set person2.nameage="{{request2.get {person.path} }}"/] is invalid
+
+
+Curly braces will not be parsed in content
+----------------------------------------------
+Curly braces are only parsed in atrributes. Curly and double curly braces in content will be just thrown out as it is
+
+[content.run]
+	these will not be parsed and just returned {person.name} and {{request2.get name}}
+[/content.run]
+
+Use shortcodes in content to parse
+[content.run]
+	these will  be parsed and just returned [env.person.name/] and [request2.get name/]
+[/content.run]
+
+
+
+only services defined in AwesomeEnterprise
+--------------------------------------------
+Sometimes AI tends to use services which are not defined in AwesomeEnterprise. 
+While creating Code only use services which are explicitly mentioned in the documentation. Any service not clearly defined in the documentation should not be used.
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+

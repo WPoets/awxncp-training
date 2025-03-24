@@ -1,0 +1,3 @@
+Read all the documents sorted by name.
+In the document 9010 Common Errors and Best Practices i have noted the best practices and the common errors made by AI. Please follow the Best Practices and do not make the common errors
+Never ever use a service not explicitly taught in the documentation.  If you have doubts or feel the approach is not good or you have a better approach always suggest. I believe in you

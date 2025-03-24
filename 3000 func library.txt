@@ -1,0 +1,348 @@
+# AwesomeEnterprise Func Library Training Manual
+
+## Introduction
+
+The `func` library in AwesomeEnterprise provides a way to create reusable blocks of code that function like PHP functions within namespaces. These functions can be registered as services and called throughout your application.
+
+Key concepts:
+- **Functions**: Self-contained blocks of AwesomeEnterprise code
+- **Namespaces**: Organizational containers for functions (can include dots like n1.n2.n3)
+- **Function Names**: Can include dots (e.g., str.create.new)
+
+## Creating Functions
+
+There are two ways to define a function in AwesomeEnterprise:
+
+### Option 1: Using Namespace Parameter
+
+```awesome
+[func.add function_name namespace=namespace_name]
+    // Function code
+[/func.add]
+```
+
+### Option 2: Using Namespace Prefix with Colon
+
+```awesome
+[func.add namespace_name:function_name]
+    // Function code
+[/func.add]
+```
+
+### Examples
+
+```awesome
+// Using namespace parameter
+[func.add info namespace=customer.block]
+    i am in info 
+    [func.dump /]
+[/func.add]
+
+// Using namespace prefix with double colon
+[func.add customer.block:info]
+    i am in info 
+    i will get all the attributes in func.atts
+    [func.dump atts /]
+    [func.dump /]
+[/func.add]
+```
+
+## Function Access and Context
+
+Functions have access to several special variables:
+
+### 1. Accessing Function Attributes
+
+All attributes passed to a function are available in `func.atts`:
+
+```awesome
+[func.add customer:welcome]
+    Hello, [func.get atts.name /]!
+[/func.add]
+```
+
+To access specific attributes:
+```awesome
+[func.get atts.parameter_name /]
+```
+
+To access all attributes:
+```awesome
+[func.dump atts /]
+```
+
+### 2. Accessing Function Content
+
+Content passed to a function is available in `func.content`:
+
+```awesome
+[func.add customer:format]
+    <div class="formatted">
+        [func.get content /]
+    </div>
+[/func.add]
+```
+
+To access content:
+```awesome
+[func.get content /]
+```
+
+### 3. Debugging Function Context
+
+You can inspect the function state:
+
+```awesome
+// Dump all function state
+[func.dump /]
+
+// Dump specific path
+[func.dump atts /]
+```
+
+## Registering Functions as Services
+
+To use a function as a service (shortcode), you need to register it:
+
+### Option 1: Using Func and Namespace Parameters
+
+```awesome
+[func.service.create service_name func=function_name namespace=namespace_name /]
+```
+
+### Option 2: Using Source Parameter
+
+```awesome
+[func.service.create service_name source=namespace_name:function_name /]
+```
+
+### Examples
+
+```awesome
+// Register simple function
+[func.service.create customer.block.info func=info namespace=customer.block /]
+
+// Alternative syntax with source
+[func.service.create customer.block.info source=customer.block:info /]
+
+// Register function with dots in name
+[func.service.create customer.block.info.hello2 source=customer.block:info.infolong.test2 /]
+```
+
+Once registered, call the function as a standard service:
+
+```awesome
+[customer.block.info name="John" /]
+```
+
+## Calling Functions Within the Same Namespace
+
+Functions within the same namespace can call each other using `func.call`:
+
+```awesome
+[func.call.function_name parameters /]
+```
+
+### Example
+
+```awesome
+// Define first function
+[func.add customer.block:info]
+    i am in info 
+    [func.dump /]
+[/func.add]
+
+// Define second function that calls the first
+[func.add customer.block:info.parent]
+    i am in info parent 
+    [func.call.info /]
+[/func.add]
+```
+
+## Returning Values from Functions
+
+By default, a function returns all its output. You can use `func.return` to explicitly return a specific value and stop execution:
+
+```awesome
+[func.return some_path /]
+```
+
+### Example Without Return
+
+```awesome
+[func.add greeting namespace=customer]
+    I will return this
+[/func.add]
+```
+
+When called, this returns "I will return this".
+
+### Example With Return
+
+```awesome
+[func.add greeting_with_return namespace=customer]
+    I will not return this
+    [env.set rval='To Output' /]
+    [func.return env.rval /]
+    [env.set x='This will not set' /]
+[/func.add]
+```
+
+When called, this returns "To Output" and skips the remaining code.
+
+## Function State Management
+
+Functions have their own state variables that you can access and modify. These state variables work similarly to template state variables.
+
+### Setting Path Values
+
+You can set values at specific paths in the function state:
+
+```awesome
+[func.set.path "value" path=formatted_order /]
+```
+
+If you have the path in the main/unnamed attribute, you can use:
+
+```awesome
+[func.set.value order.is_priority value=bool:true /]
+```
+
+### Setting Multiple Values
+
+You can set multiple path values at once:
+
+```awesome
+[func.set.paths  
+    path.atts.order_id="ORD-12345"
+    path.atts.type="express"
+    path.atts.date="2025-03-14"
+    path.atts.status="processing"
+    path.atts.customer_id="CUST-789"
+    path.atts.customer_email="customer@example.com"
+    path.atts.customer_phone="555-123-4567"
+/]
+```
+
+### Setting Content Values
+
+You can parse content and set the resulting value:
+
+```awesome
+[func.set.content order.customer_info]
+    [str.create "Customer ID: {func.atts.customer_id}" /]
+    [str.create "Contact: {func.atts.customer_email} " pipe:@=str.prepend pipe:target="func.atts.customer_phone" /]
+    [str.create "{func.atts.notvalid}" /]
+    hello
+[/func.set.content]
+```
+
+### Setting Raw Content
+
+You can set unparsed content as a value:
+
+```awesome
+[func.set.raw param4]
+    This content will not be parsed
+[/func.set.raw]
+```
+
+## Accessing Function Data
+
+Functions provide access to their data through various methods:
+
+```awesome
+// Get value from function state
+[func.get path /]
+
+// Dump function information
+[func.dump /]
+
+// Dump specific path
+[func.dump path /]
+
+// Echo function information
+[func.echo /]
+
+// Echo specific path
+[func.echo path /]
+```
+
+### Example 1: Basic Function with Parameters
+
+```awesome
+// Define function
+[func.add customer.block:info]
+    Customer Info:
+    Name: [func.get atts.name /]
+    Email: [func.get atts.email /]
+[/func.add]
+
+// Register as service
+[func.service.create customer.info func=info namespace=customer.block /]
+
+// Call function
+[customer.info name="John Doe" email="john@example.com" /]
+```
+
+### Example 2: Functions Calling Other Functions
+
+```awesome
+// Define helper function
+[func.add utils:format_name]
+    [str.case.title main={func.get atts.name} /]
+[/func.add]
+
+// Define main function
+[func.add utils:welcome]
+    Welcome, [func.call.format_name name={func.get atts.user_name} /]!
+[/func.add]
+
+// Register main function
+[func.service.create utils.welcome func=welcome namespace=utils /]
+
+// Call function
+[utils.welcome user_name="john doe" /]
+```
+
+### Example 3: Early Returns and Validation
+
+```awesome
+[func.add validation:check_email]
+    [cond.block.@validate cond.@=email_id.is.valid cond.main={func.get atts.email}]
+        [@validate.then]
+            [func.return "Valid email" /]
+        [/@validate.then]
+        [@validate.else]
+            [func.return "Invalid email format" /]
+            // Code below won't execute
+        [/@validate.else]
+    [/cond.block.@validate]
+    
+    This line will never execute if email is invalid
+[/func.add]
+```
+
+## Best Practices
+
+1. **Organize Related Functions**
+   - Group related functions in logical namespaces
+   - Use hierarchical naming for clarity
+
+2. **Use Descriptive Names**
+   - Choose clear, descriptive function names
+   - Consider using dots for nested functionality (e.g., user.profile.display)
+
+3. **Document Your Functions**
+   - Include comments explaining function purpose
+   - Document expected parameters
+
+4. **Handle Errors Gracefully**
+   - Validate input parameters
+   - Use early returns for invalid cases
+
+5. **Reuse Code**
+   - Call helper functions rather than duplicating code
+   - Break complex functions into smaller, reusable parts
+
+This training manual covers the core concepts of the `func` library in AwesomeEnterprise, providing you with the knowledge to create, organize, and use functions effectively in your applications.

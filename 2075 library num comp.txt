@@ -1,0 +1,71 @@
+# Numeric (Float) Comparison Library
+
+The `num.comp` library provides a set of services for comparing floating-point values in AwesomeEnterprise. These services support both direct usage and pipe operations, with special handling for floating-point precision.
+
+## Available Services
+
+All services require float values and use `num:` prefix for typecasting.
+
+### num.comp.eq
+Checks if two floats are equal (using PHP_FLOAT_EPSILON for precision)
+```
+[num.comp.eq main="num:1.0" with="num:1.0" /]  // Returns true
+```
+
+### num.comp.neq
+Checks if two floats are not equal
+```
+[num.comp.neq main="num:1.0" with="num:1.1" /]  // Returns true
+```
+
+### num.comp.lt
+Checks if first float is less than second
+```
+[num.comp.lt main="num:1.5" with="num:2.0" /]  // Returns true
+```
+
+### num.comp.gt
+Checks if first float is greater than second
+```
+[num.comp.gt main="num:2.5" with="num:2.0" /]  // Returns true
+```
+
+### num.comp.lte
+Checks if first float is less than or equal to second
+```
+[num.comp.lte main="num:2.0" with="num:2.0" /]  // Returns true
+```
+
+### num.comp.gte
+Checks if first float is greater than or equal to second
+```
+[num.comp.gte main="num:2.0" with="num:2.0" /]  // Returns true
+```
+
+## Usage Patterns
+
+### 1. Direct Usage
+```
+[num.comp.eq main="num:1.0" with="num:1.0" /]
+```
+
+### 2. Pipe Usage
+```
+[num.create "1.0" pipe:@=num.comp.eq pipe:with="num:1.0" /]
+```
+
+### 3. With Environment Variables
+```
+[env.set price="num:10.5" /]
+[env.get price pipe:@=num.comp.gt pipe:with="num:10.0" /]
+```
+
+
+
+## Important Notes
+
+1. All values must be floats
+2. Use `num:` prefix for typecasting
+3. Equality comparisons (eq, neq) use PHP_FLOAT_EPSILON for precision
+4. When using pipes, the piped value becomes the 'main' parameter
+5. The 'with' parameter is always required

@@ -1,0 +1,61 @@
+[templates.add ui.linechart.toast]
+  //** Get configuration from data **//
+  [template.get data.section.id out:@template.set=chart_id /]
+  [template.get data.section.title out:@template.set=chart_title /]
+  [template.get data.options out:@template.set=options /]
+  
+  //** Group series data by year **//
+  [arr.empty out:@template.set=series_data /]
+  [arr_each.build.@series main={template.state.series} out:@template.set=series_by_year]
+    [cond.true cond.@=str.comp.neq cond.main={@series.info.index} cond.with=0],[/cond.true]
+    {
+      "name": "[@series.info.value.series /]",
+      "value": "[@series.info.value.value /]"
+    }
+  [/arr_each.build.@series]
+
+  //** Build chart HTML **//
+  [content.run out:@template.set=chart_html]
+    <link rel="stylesheet" href="https://uicdn.toast.com/chart/latest/toastui-chart.min.css">
+    <script src="https://uicdn.toast.com/chart/latest/toastui-chart.min.js"></script>
+
+    <div id="[template.chart_id /]"></div>
+    <script>
+      const el = document.getElementById('[template.chart_id /]');
+      const data = {
+        categories: [arr.join.comma main={template.state.categories} /],
+        series: [
+          {
+            name: '2023',
+            data: [arr_each.build.@year main={template.state.series}][@year.info.value.series|when:@=str.comp.eq when:with="2023"][@year.info.value.value /],[/when][/arr_each.build.@year]
+          },
+          {
+            name: '2024',
+            data: [arr_each.build.@year main={template.state.series}][@year.info.value.series|when:@=str.comp.eq when:with="2024"][@year.info.value.value /],[/when][/arr_each.build.@year]
+          }
+        ]
+      };
+      const options = {
+        chart: { 
+          title: '[template.chart_title /]',
+          width: [template.options.width /],
+          height: [template.options.height /]
+        },
+        xAxis: {
+          title: '[template.options.xAxis_title /]'
+        },
+        yAxis: {
+          title: '[template.options.yAxis_title /]'
+        },
+        legend: {
+          align: 'bottom'
+        }
+      };
+      const chart = toastui.Chart.lineChart({ el, data, options });
+    </script>
+  [/content.run]
+
+  //** Set result in state and return **//
+  [template.set.paths path.state.{template.data.result.state_path}={template.chart_html} /]
+  [template.return template.state /]
+[/templates.add]

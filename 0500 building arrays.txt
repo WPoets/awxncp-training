@@ -1,0 +1,693 @@
+In Awesome Enterprise you can build associative arrays. Associative arrays are like php associative arrays
+
+Below i explain various ways to create associative arrays
+
+env.set
+--------------------------------------
+You can use env.set to create associative arrays
+
+[env.set person.name=vikas person.age=25 person.sex=male /]
+
+the above would create the following
+
+env
+	[person]
+		[name]='vikas'
+		[age]='25'
+		[sex]='male'
+
+Since keys cannot have spaces you cannot create keys with spaces in this method
+
+
+env.set_array with key=value pairs
+--------------------------------------
+To setup an associative array in env
+
+command: env.set_array
+
+attributes::
+
+unnamed/main
+The initial path to the array
+
+all other attributes are key=value pairs
+The keys cannot have spaces so you have to choose keys which do not have spaces
+
+[env.set_array 'initial path' key1='value1' key2='value2' /]
+
+
+example 1::
+[env.set_array person name='vikas' age=25 sex=male /]
+
+the above would create the following
+
+env
+	[person]
+		[name]='vikas'
+		[age]='25'
+		[sex]='male'
+
+creating more complex arrays
+
+example2::
+[env.set_array person.address line1='this is line 1' line2='this is line 2' /]
+
+env
+	[
+		"address" =>  
+			[
+				"line1" =>  "this is line 1"
+				"line2" => "this is line 2"
+			]
+	]
+
+
+
+example3:
+
+[env.set_array cities 
+    newyork.name='New York'
+    newyork.country='USA'
+	
+    delhi.name='Delhi'
+    delhi.country='India'
+/]
+
+
+will create an associative array
+
+env
+	[
+		"newyork" =>   
+			[
+				"name"    => "New York"
+				"country" => "USA"
+			]
+		"delhi"   =>  
+			[
+				"name"    =>  "Delhi"
+				"country" =>  "India"
+			]
+	]
+
+
+example4::
+
+[env.set_array person.address line1='this is line 1' line2='this is line 2' /]
+[env.set_array person.address	line3='this is line 3' line4='this is line 4' /]
+
+will create 
+
+env
+[
+    "address" => 
+        [
+            "line1" =>  "this is line 1"
+            "line2" =>  "this is line 2"
+            "line3" =>  "this is line 3"
+            "line4" =>  "this is line 4"
+        ]
+]
+
+
+Not allowed:: 
+The keys of the associative array cannot be just a number
+
+[env.set_array person.address 1='this is line 1' 2='this is line 2' /]
+
+The above is an error since keys cannot be numbers like 1 or 2
+
+
+env.set_array with content
+--------------------------------------
+You can create arrays specially multidimensional using the content
+Note that all the array keys are small case and do not allow special characters.
+
+
+example1::
+[env.set_array cities_array]  
+	[newyork name='New York' country='USA' /]
+	[delhi name='Delhi' country='India' /]
+[/env.set_array]  
+
+
+will create
+
+env 
+    "cities_array"      =>  array(2) 
+        [
+            "newyork" =>  array(2) 
+                [
+                    "name"    => string(8) "New York"
+                    "country" => string(3) "USA"
+                ]
+            "delhi"   =>  array(2) 
+                [
+                    "name"    => string(5) "Delhi"
+                    "country" => string(5) "India"
+                ]
+        ]
+
+
+example2::
+
+[env.set_array cities_array]  
+	[newyork]
+		[name]New York[/name]
+		[country]USA[/country]
+	[/newyork]	
+	[delhi name='Delhi' country='India' /]
+[/env.set_array]  
+
+will also create the same array as example1
+
+
+Understanding building arrays with content in detail
+--------------------------------------------------------
+AwesomeEnterprise has a very powerful way of creating complex arrays with content.
+
+array items
+...............
+Array item names cannot have spaces or dots (only [a-zA-Z0-9_\-@] set is allowed )
+That is how it distinguishes whether it is a array item or a shortcode as shortcodes always have a dot.
+
+[module.set_array cities_array]  
+	[newyork]
+		[name]New York[/name]
+		[country]USA[/country]
+	[/newyork]	
+[/module.set_array]  
+
+will create
+
+ array(1) 
+[
+    "newyork" =>  array(2) 
+        [
+            "name"    => string(8) "New York"
+            "country" => string(3) "USA"
+        ]
+]
+
+
+
+array child items as attributes or within content
+..............................
+Attributes in an item are considered as child items.
+Nodes in content which do not have a dot are considered child items
+
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India' /]
+[/module.set_array]  
+
+ array(1) 
+[
+    "delhi" =>  array(2) 
+        [
+            "name"    => string(5) "Delhi"
+            "country" => string(5) "India"
+        ]
+]
+
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India']
+  	[desc]
+    	This is the description
+    [/desc]
+    [tourist_info]
+    this is the tourist info
+    [/tourist_info]
+  [/delhi]
+[/module.set_array]  
+
+
+ array(1) 
+[
+    "delhi" =>  array(4) 
+        [
+            "name"         => string(5) "Delhi"
+            "country"      => string(5) "India"
+            "desc"         => string(34) "
+    	This is the description
+    "
+            "tourist_info" => string(34) "
+    this is the tourist info
+    "
+        ]
+]
+
+
+
+Curly braces and double curly braces
+........................................
+Like in shortcode attributes you can use {} and {{}} in attribute values while building child items.
+Curly braces will be resolved by env paths and double curly braces with AwesomeEnterprise services similar to Shortcodes.
+
+[module.set city_name='Delhi' /]
+
+[module.set_array cities_array]  
+	[delhi name='{module.city_name}' country='{{request2.get country}}' /]
+[/module.set_array]  
+
+will give back 
+
+ array(1) 
+[
+    "delhi" =>  array(2) 
+        [
+            "name"    => string(5) "Delhi"
+            "country" => string(5) "India"
+        ]
+]
+
+Conditions
+-------------------
+To make a particular node condition you can use condition processors
+Condition Processors use the following format
+
+when:@=<any service which returns a boolean value>
+when:args1=value
+when:args2=value
+..
+
+you can also add an and or an or condition
+
+when:and.@=<any service which returns a boolean value>
+when:and.args1=value
+when:and.args2=value
+..
+
+when:or.@=<any service which returns a boolean value>
+when:or.args1=value
+when:or.args2=value
+..
+
+
+[module.set_array product_catalog]
+  [books 
+  	when:@=int.is.odd when:main=int:5
+  	when:or.@=int.is.odd when:or.main=int:6
+  ]
+    [@new when:@=int.is.odd when:main=int:5]
+      [title
+		when:@=int.is.odd when:main=int:5
+		when:and.@=int.is.odd when:and.main=int:6
+	  ]The Great Gatsby[/title]
+      [author]F. Scott Fitzgerald[/author]
+      [price _value="num:12.99" /]
+      [format]Paperback[/format]
+    [/@new]
+    [@new]
+      [title]To Kill a Mockingbird[/title]
+      [author when:@=int.is.even when:main=int:7
+      ]Harper Lee[/author]
+      [price _value="num:14.99" /]
+      [format]Hardcover[/format]
+    [/@new]
+  [/books]
+[/module.set_array]
+
+will reply with 
+
+    "product_catalog" =>  array(1) 
+        [
+            "books" =>  array(2) 
+                [
+                    0 =>  array(3) 
+                        [
+                            "author" => string(19) "F. Scott Fitzgerald"
+                            "price"  => float(12.99)
+                            "format" => string(9) "Paperback"
+                        ]
+                    1 =>  array(3) 
+                        [
+                            "title"  => string(21) "To Kill a Mockingbird"
+                            "price"  => float(14.99)
+                            "format" => string(9) "Hardcover"
+                        ]
+                ]
+        ]
+
+
+
+
+  [books 
+  	when:@=int.is.odd when:main=int:5
+  	when:or.@=int.is.odd when:or.main=int:6
+  ]
+
+will succeed since the first condition will succeed 
+
+
+      [title
+		when:@=int.is.odd when:main=int:5
+		when:and.@=int.is.odd when:and.main=int:6
+	  ]The Great Gatsby[/title]
+will fail since the and will fail
+
+
+      [author when:@=int.is.even when:main=int:7
+      ]Harper Lee[/author]
+will fail since condition will fail
+
+
+
+Using shortcodes to execute some code and return string values
+----------------------------------------
+You can embed pieces of code within the item content. It will get parsed as AwesomeEnterprise code
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India']
+  	[desc]
+    	The shortcodes within this will get parsed. [str.create "I will get parsed" /]
+    [/desc]
+  [/delhi]
+[/module.set_array]  
+
+
+will give back
+
+ array(1) 
+[
+    "delhi" =>  array(3) 
+        [
+            "name"    => string(5) "Delhi"
+            "country" => string(5) "India"
+            "desc"    => string(61) "The shortcodes within this will get parsed. I will get parsed"
+        ]
+]
+
+
+@do to execute code and return array items
+-------------------------------------
+if you want to execute some code and return back items which should become part of the array then you can use a special keyword - @do
+Note that the return value of the @do will be included into the array and the nodes will be processed accordingly 
+
+
+  [module.set mode=equifax /]
+  [module.set_array check]
+	
+  [before]i am before[/before]
+	[@do]
+		[equifax]
+		  [service]dist_eligible.equifax.check[/service]       
+		[/equifax]
+	[/@do]
+  [after]i am after[/after]
+
+[/module.set_array]
+
+
+ array(3) 
+[
+    "before"  => string(11) "i am before"
+    "equifax" =>  array(1) 
+        [
+            "service" => string(27) "dist_eligible.equifax.check"
+        ]
+    "after"   => string(10) "i am after"
+]
+
+
+The @do will be parsed and the equifax item will be returned
+
+raw to parse content later
+------------------------------
+You can use the "raw" keyword as an unnamed attribute in an item to be able to parse the content later. 
+You can also use it as a separate item.
+This is very useful when you will be getting values later and so want to parse content later.
+
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India']
+  	[info raw]
+    	This is the description which i will parse later [module.info /]
+    [/info]
+  	[interest]
+    	[raw]
+    	This is the description which i will parse later [module.info /]
+      [/raw]
+    [/interest]
+
+
+	[tourist_info]
+    this is the tourist info
+    [/tourist_info]
+  [/delhi]
+[/module.set_array]
+
+In the above array the info would have been parsed the moment you created the array. But you want to store the code and parse it later. So you can use the raw keyword.
+Similarly interest will also store the code and not parse it
+
+
+The array stored is 
+
+ array(1) 
+[
+    "delhi" =>  array(5) 
+        [
+            "name"         => string(5) "Delhi"
+            "country"      => string(5) "India"
+            "info"         => string(75) "
+    	This is the description which i will parse later [module.info /]
+    "
+            "interest"     => string(77) "
+    	This is the description which i will parse later [module.info /]
+      "
+            "tourist_info" => string(34) "
+    this is the tourist info
+    "
+        ]
+]
+
+
+Note that the code is not parsed.
+
+
+
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India']
+  	[info raw]
+    	This is the description which i will parse later [module.info /]
+    [/info]
+    [tourist_info]
+    this is the tourist info
+    [/tourist_info]
+  [/delhi]
+[/module.set_array]  
+
+[module.set info='This info will be set later' /]
+
+The info is : [code.run module.cities_array.delhi.info /]
+
+In the above code we later run the code which we had stored.
+So we will get 
+
+
+The info is : This is the description which i will parse later This info will be set later
+
+setting value of an item
+-----------------------------
+There are two ways to setup the value of an item
+
+ [module.set_array cities_array]  
+  [cities]
+    [pune]
+		[info]Pune is the largest city of [env.get pune_state/][/info]
+		[population]8000[/population]
+	[/pune]	
+  [/cities]
+[/module.set_array] 
+
+In the above approach you use the content the set the value. This is useful when you want to have large amount of content like in descriptions or you want to parse code. The value returned is always a string as when you parse content it always returns string datatype
+
+
+ [module.set_array cities_array]  
+  [cities]
+    [pune]
+		[country _value={pune_state} /]
+		[population _value='int:8000' /]
+	[/pune]	
+  [/cities]
+[/module.set_array] 
+
+
+In the above approach you use a special keyword _value to set the value. This is useful when you want to set a datatype and you have small amounts of content or content is stored in the environment
+
+type casting the value
+---------------------------
+if you use content to create the value it will always be a string
+
+ [module.set_array cities_array]  
+    [pune]
+		[population]8000[/population]
+	[/pune]
+[/module.set_array] 
+
+in the above the population= string(8000)
+
+To get a correctly typecasted value use _value and typecast the value. If not typecasted it is string
+
+ [module.set_array cities_array]  
+  [cities]
+    [pune]
+		[country _value=str:india /]
+		[population _value='int:8000' /]
+		[average_age _value='num:32.5' /]
+		[is_costly _value='bool:true' /]
+		
+		
+	[/pune]	
+  [/cities]
+[/module.set_array] 
+
+ 
+
+Creating indexed arrays
+-------------------------
+If you want to create indexed arrays instead of associative arrays then u use the @new keyword
+
+ [module.set_array cities_array]  
+  [cities]
+  	[@new pop=9000 name=nagpur /]
+  	[@new pop=9000 name=nashik /]
+  	[@new _value=goa /]
+  [/cities]
+[/module.set_array] 
+
+
+will create an indexed array
+
+ array(1) 
+[
+    "cities" =>  array(3) 
+        [
+            0 =>  array(2) 
+                [
+                    "pop"  => string(4) "9000"
+                    "name" => string(6) "nagpur"
+                ]
+            1 =>  array(2) 
+                [
+                    "pop"  => string(4) "9000"
+                    "name" => string(6) "nashik"
+                ]
+            2 => string(3) "goa"
+        ]
+]
+
+
+keys with spaces and special characters
+------------------------------------------
+To be used only when you are forced to create keys with special charcters or spaces. You should never use this approach until explicitly required
+
+ [module.set_array cities_array]  
+  [@key "All Cities"]
+  	[kolkata pop=int:9000 name=kolkata /]
+  	[asansol pop=int:9000 name=asansol /]
+  	[@key2 "Madhya Pradesh" _value=mp /]
+  [/@key]
+[/module.set_array] 
+
+use the keyword @key or @key2 as above and give the name of the key as unnamed attribute.
+@key and @key2 are available because when you are building arrays you cannot nest nodes with same name. So in case you have @key within @key you can use @key2 in the inner situation
+
+the above will give back
+
+
+ array(1) 
+[
+    "All Cities" =>  array(3) 
+        [
+            "kolkata"        =>  array(2) 
+                [
+                    "pop"  => int(9000)
+                    "name" => string(7) "kolkata"
+                ]
+            "asansol"        =>  array(2) 
+                [
+                    "pop"  => int(9000)
+                    "name" => string(7) "asansol"
+                ]
+            "Madhya Pradesh" => string(2) "mp"
+        ]
+]
+
+
+Merging Arrays
+------------------------------
+
+
+if you start building an array with env.set_array using key-value pairs, and then later use the content-based approach you may need to merge the arrays. 
+
+you can use the outputter o.merge_with to merge two arrays
+
+
+ [module.set_array cities_array]  
+  [cities]
+  	[@new pop=9000 name=nagpur /]
+  	[@new pop=9000 name=nashik /]
+  	[@new _value=goa /]
+  [/cities]
+[/module.set_array] 
+
+[arr.create o.merge_with=module.cities_array]
+  [states]
+  	[maharastra _value=Maharashtra /]
+  	[punjab _value=Punjab /]
+  [/states]
+[/arr.create]
+
+The above will give an array as below
+
+ array(2) 
+[
+    "cities" =>  array(3) 
+        [
+            0 =>  array(2) 
+            1 =>  array(2) 
+            2 => string(3) "goa"
+        ]
+    "states" =>  array(2) 
+        [
+            "maharastra" => string(11) "Maharashtra"
+            "punjab"     => string(6) "Punjab"
+        ]
+]
+
+
+
+
+Sample @do
+----------------------
+
+[env.set_array template.data.slide]
+    [@do]
+        [env.set current_id=""]
+        [env.set_array current_item]
+
+		[arr_each.build.@row main={template.raw_testimonials}]
+		[cond.block.@check cond.@=str.comp.neq cond.main={@row.ID} cond.with={current_id}]
+			[@check.then]
+				[cond.block.@current cond.@=str.is.not_empty cond.main={current_id}]
+					[@current.then]
+						<!-- Add the completed item to the slide array -->
+						[@new][env.dump current_item /][/@new]
+						[env.set_array current_item] <!-- Reset current_item -->
+					[/@current.then]
+				[/cond.block.@current]
+				
+				[env.set current_id={@row.ID}]
+				[env.set current_item.id={@row.ID}]
+				[env.set current_item.message={@row.message}]
+			[/@check.then]
+			[@check.else]
+                [env.set current_item.{@row.meta_key}={@row.meta_value}]
+			[/@check.else]
+		[/cond.block.@check]
+            
+    [/@do]
+[/env.set_array]

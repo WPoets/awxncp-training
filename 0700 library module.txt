@@ -1,0 +1,245 @@
+This document covers how to work with the 'module' library.
+
+In AwesomeEnterprise all the code is in modules as explained in the Structure Doc.
+A module can be split into templates as defined separately
+
+
+The document Covers
+
+a) How to define a module
+b) How to run a module
+c) When a module is running
+
+
+a) Define a Module::
+===============================
+
+Within a post type in wordpress
+------------------------------------
+A post type can be defined as a collection and modules within that post type can be used to create AwesomeEnterprise Code 
+
+
+Within a folder
+------------------------------------
+A folder can be defined as a collection and files within that folder then become modules
+
+
+
+
+b) Run a Module
+=======================================
+Run a module of an external collection
+------------------------------------
+If you want to run an external module. This is rarely used and has been deprecated
+
+[module.run <modulename> template='modulename' /]
+
+
+Run a module from a collection which is defined as a service
+-------------------------------------------------------------
+AwesomeEnterprise has powerful support for defining collections a service. 
+This allows you to run modules as services
+Normally we dont have to define collections as services as they are already done when AwesomeEnterprise is initiated
+This is very important as i will also be telling you about all the collections available.
+
+Here below a collection(db_2) is defined as a service 
+[services.add html_pages service_label='HTML Pages' post_type='html_pages' desc='HTML Pages' service=yes connection='live_connection' /]
+
+So you can now access the module of this service as below:
+
+[collection_name.modulename /]
+
+Eg:: 
+To run the module::single_product_page of collection html_pages we can simply use
+[html_pages.single_product_page /]
+
+if you pass any parameters they will be sent as arguments to the module.
+
+[html_pages.single_product_page param1=x param2=y /]
+The module will receive the parameters param1 and param2
+
+This will run the module single_product_page. 
+If you have defined a template called 'main' in the module it will run that template rather than the module.
+Note that the parameters will be set at a module level and not at a template level. 
+
+
+
+Common things while running a module
+-------------------------------------------
+Their are various ways of calling a module. They all follow the same pattern.
+All the additional attributes are passed to the module as args. 
+
+[module.run module1 param1=x param2=y /]
+
+[html_pages.single_product_page param1=x param2=y /]
+- will run the module or the template main if there is one
+
+In all the above all the additional parameters are sent as args to the module.
+So the module will receive param1=x param2=y as args
+
+
+
+
+c) When a module is running
+===============================================
+Whichever way you run a module - the module behaves in the same way.
+
+When a module is running it creates a state variable in the env with the same name 'module'
+This only exists when the module is running. This is great as keeps the module values within the local scope and does not clutter the global scope.
+The module state variable is accessed using the same service 'module'
+
+
+by default the module state variable has the following values
+
+[
+    "obj_type"   => string(6) "module"
+    "obj_id"     => string(51) "module:modules:m-testloan-app:ai-module-test:bsnPrC"
+    "slug"       => string(14) "ai-module-test"
+    "hash"       => string(37) "modules:m-testloan-app:ai-module-test"
+    "title"      => string(14) "ai-module-test"
+    "collection" =>  array(2) 
+        [
+            "post_type"  => string(14) "m-testloan-app"
+            "connection" => string(8) "#default"
+        ]
+]
+
+when you call a module the params are added to the state variable
+
+eg:
+
+[html_pages.single_product_page param1=x param2=y /]
+
+
+[
+    "obj_type"   => string(6) "module"
+    "obj_id"     => string(51) "module:modules:m-testloan-app:ai-module-test:bsnPrC"
+    "slug"       => string(14) "ai-module-test"
+    "hash"       => string(37) "modules:m-testloan-app:ai-module-test"
+    "title"      => string(14) "ai-module-test"
+    "collection" =>  array(2) 
+        [
+            "post_type"  => string(14) "m-testloan-app"
+            "connection" => string(8) "#default"
+        ]
+    "param1"   => string(1) "x"		
+    "param2"   => string(1) "y"		
+]
+
+working with the module state variable
+-----------------------------------------
+The module state variable is an item in the env. So you can do similar things as you can do with the env.
+
+[module.get param1] is same as [env.get module.param1 /]
+
+To get a module value you can directly use 
+[module.<variable path> /] is same as [env.module.<variable path>/]
+
+[module.param1 /] is same as [env.module.param1 /]
+
+You can add values to the state variable using module.set  
+[module.set param3=hello] 	is same as [env.set module.param3=hello /]
+
+
+[module.set_raw param4]
+	This conent will not be parsed
+[/module.set_raw]
+is same as 
+[env.set_raw module.param4]
+	This content will not be parsed
+[/env.set_raw] 
+
+
+[module.set_array person name=5 age=6 /]
+is same as 
+[env.set_array module.person name=5 age=6 /]
+
+
+[module.dump /]
+is same as 
+[env.dump /]
+
+
+[module.dump param1 /]
+is same as 
+[env.dump module.param1 /]
+
+
+[module.echo /]
+is same as 
+[env.echo /]
+
+[module.echo param1 /]
+is same as 
+[env.echo module.param1 /]
+
+
+module.return
+-----------------------
+Normally the module will collect the reply of the code and return that. However if you want to break the flow and return a particular value you can use module.return 
+
+[module.return <some env path> /]
+
+eg::
+
+without return:
+
+<body>I will return this</body>
+
+will return '<body>I will return this</body>'
+
+
+with return:
+
+<body>I will not return this</body>
+[module.set rval='To Output' /]
+[module.return module.rval /]
+[env.set x='This will not set' /]
+
+
+The above will output 'To Output'  
+ 'I will not return this' will get discarded.
+The env variable x will also not get set because the module will return before that 
+ 
+
+
+Here is the all the services in the 'module' library
+------------------------------------------------------------
+[module.run <modulename> module='modulename' /] - deprecated
+[servicename.modulename /] - to run a module where the collection is registered as a service
+
+[module.get param1] get a path from env.module
+[module.set param3=hello] set a path in env.module
+[module.set_raw param4]
+	This content will not be parsed
+[/module.set_raw]
+sets the content as a value in env.module
+
+[module.set_array person name=5 age=6 /] - sets an array in env.module
+[module.dump <optional path>/] - dumps env.module
+[module.echo <optional path>/] - echo env.module
+
+[module.return <env path> /] - will return a value
+
+All the above are services which are preferred. 
+[module.<variable path> /] will return the value of the path. Note that if the path conflicts with the name of a service the service will be executed. 
+
+six predefined variables
+[module.title /]
+[module.slug /]
+[module.hash /]
+[module.collection /]
+[module.obj_type /]
+[module.obj_id /]
+
+
+Any attempt to create variables of same names will overwrite.
+
+
+So it is best to not create any variables with the same name as the services or existing variables.
+Also when passing parameters to the module same rules apply. Dont use any service names and any pre existing variables
+
+
+
+
+ 

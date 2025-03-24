@@ -1,0 +1,98 @@
+Building a Form in Awesome Enterprise using Steps
+
+
+Steps
+-----------------
+Steps is a Awesome array of step
+Each step renders a part of the form
+
+
+[arr.create out:@template.set=form_builder]
+  [steps]
+    [step @new type=field
+      c.cond="yes" c.eq={form_data.visible.personal_email}
+    ]      
+      [service]lt_ui_atoms.personal-email.render[/service]
+      [data]
+        [required _value='yes' /]
+        [personal_email _value={form_data.lapp.personal_email} /]
+        [output_key _value='personal_email' /]
+        [placeholder _value='Enter Personal Email' /]
+        [label]
+          [icon _value='email' /]
+        [/label]
+      [/data]    
+    [/step]
+    
+    [step @new type=field
+      c.cond="yes" c.eq={form_data.visible.mobile_number}
+    ]      
+      [service]lt_ui_atoms.mobile-number.render[/service]
+      [data]
+        [required _value='yes' /]
+        [mobile_number _value={form_data.lapp.mobile_number} /]
+        [output_key _value='mobile_number' /]
+        [placeholder _value='Enter Mobile Number' /]
+        [label]
+          [icon _value='phone_iphone' /]
+        [/label]
+      [/data]    
+    [/step]
+    
+    [step @new type=field
+      c.cond="yes" c.eq={form_data.visible.home_zipcode}
+    ]      
+      [service]lt_ui_atoms.home-zipcode.render[/service]
+      [data]
+        [required _value='yes' /]
+        [mobile_number _value={form_data.lapp.channel_code} /]
+        [home_zipcode _value={form_data.lapp.home_zipcode} /]
+        [output_key _value='home_zipcode' /]
+        [placeholder _value='Home Zipcode' /]
+        [label]
+          [icon _value='location_city' /]
+        [/label]
+      [/data]    
+    [/step]
+  [/steps]
+[/arr.create]
+
+
+Step
+------------------
+Each step calls a Service.
+Step takes a item called type which tells which type of step this is.
+Based on the type the step takes the other parameters
+
+
+Step type=field
+-------------------------------------------------------
+To call a UI form Atom the step type=field
+
+Service is the UI atom to call
+
+data is the data to be passed to UI Form Atom
+
+
+Example
+
+lt_ui_atoms.personal-email.render needs the following data
+required = yes/no
+personal_email = value of the current email. Optional
+placeholder = placeholder to display
+label = label to display
+
+output_key = The key to return. This key is used to build the reply object for the whole form
+
+
+    [step @new type=field]      
+      [service]lt_ui_atoms.personal-email.render[/service]
+      [data]
+        [required _value=yes /]
+        [personal_email _value={@form_data.lapp.personal_email} /]
+        [output_key _value='personal_email' /]
+        [placeholder _value='Enter Personal Email'/]
+        [label _value="email" /]
+      [/data]      
+    [/step]
+	

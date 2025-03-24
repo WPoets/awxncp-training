@@ -1,0 +1,267 @@
+# Numeric Library Documentation
+
+## Overview
+The num library provides comprehensive functionality for working with numeric values in AwesomeEnterprise. It includes services for creating, validating, checking, manipulating, and transforming numbers.
+
+## Core Services
+
+### Basic Numeric Operations
+
+#### num.create
+Creates and returns a value as a float
+```awesome
+[num.create num:42.5 /]
+[num.create main="num:42.5" /]  // Alternative syntax
+```
+
+#### num.get
+Gets numeric value from environment with optional default
+```awesome
+[num.get main="path.to.value" default="num:0.00" /]
+```
+
+### Numeric Type Checks
+
+#### num.is.num
+Check if value is a number
+```awesome
+[num.is.num main="num:42.5" /]  // Returns bool:true
+[num.is.num main="hello" /]     // Returns bool:false
+```
+
+#### num.is.not_num
+Check if value is not a number
+```awesome
+[num.is.not_num main="hello" /]  // Returns bool:true
+[num.is.not_num main="42.5" /]   // Returns bool:false
+```
+
+### Sign Checks
+
+#### num.is.positive
+Check if number is positive
+```awesome
+[num.is.positive main="num:42.5" /]  // Returns bool:true
+[num.is.positive main="num:-42.5" /] // Returns bool:false
+```
+
+#### num.is.negative
+Check if number is negative
+```awesome
+[num.is.negative main="num:-42.5" /] // Returns bool:true
+[num.is.negative main="num:42.5" /]  // Returns bool:false
+```
+
+#### num.is.zero
+Check if number is exactly zero
+```awesome
+[num.is.zero main="num:0.0" /]  // Returns bool:true
+[num.is.zero main="num:42.5" /] // Returns bool:false
+```
+
+### Range Checks
+
+#### num.is.between
+Check if number is within a specified range (inclusive)
+```awesome
+[num.is.between main="num:5.5" min="num:1.0" max="num:10.0" /]
+```
+
+### Rounding Operations
+
+#### num.ceiling
+Round up to nearest integer
+```awesome
+[num.ceiling main="num:4.2" /]  // Returns 5
+```
+
+#### num.floor
+Round down to nearest integer
+```awesome
+[num.floor main="num:4.8" /]  // Returns 4
+```
+
+#### num.round
+Round to specified precision
+```awesome
+[num.round main="num:4.567" precision="num:2" /]  // Returns 4.57
+```
+
+#### num.truncate
+Truncate to specified decimals
+```awesome
+[num.truncate main="num:4.567" decimals="num:2" /]  // Returns 4.56
+```
+
+### Mathematical Functions
+
+#### num.abs
+Get absolute value
+```awesome
+[num.abs main="num:-42.5" /]  // Returns 42.5
+```
+
+#### num.min
+Get minimum of multiple numbers
+```awesome
+[num.min var.1="num:10" var.2="num:5" var.3="num:8" /]  // Returns 5
+```
+
+#### num.max
+Get maximum of multiple numbers
+```awesome
+[num.max var.1="num:10" var.2="num:5" var.3="num:8" /]  // Returns 10
+```
+
+#### num.sum
+Calculate sum of multiple numbers
+```awesome
+[num.sum var.1="num:10" var.2="num:5" var.3="num:8" /]  // Returns 23
+```
+
+### Type Conversion
+
+#### num.to.str
+Convert number to string
+```awesome
+[num.to.str main="num:42.5" /]  // Returns "42.5"
+```
+
+#### num.to.int
+Convert number to integer
+```awesome
+[num.to.int main="num:42.5" /]  // Returns 42
+```
+
+### Random Number Generation
+
+#### num.rand
+Generate random number within range
+```awesome
+[num.rand min="num:1" max="num:10" /]  // Returns random number between 1 and 10
+```
+
+## Best Practices
+
+1. Always use type casting with num: prefix
+```awesome
+// Good
+[num.create main="num:42.5" /]
+
+// Bad - might cause type errors
+[num.create main="42.5" /]
+```
+
+2. Handle potential errors with cond blocks
+```awesome
+[cond.block.@validate]
+    [@validate.then.and cond.@=num.is.num cond.main={value}]
+        Process valid number
+    [/@validate.then.and]
+    [@validate.else]
+        Handle invalid input
+    [/@validate.else]
+[/cond.block.@validate]
+```
+
+3. Use appropriate precision for financial calculations
+```awesome
+[num.round main={amount} precision="num:2" /]
+```
+
+4. Validate ranges before comparisons
+```awesome
+[cond.block.@check]
+    [@check.then.and 
+        cond.@=num.is.between 
+        cond.main={value} 
+        cond.min="num:0" 
+        cond.max="num:100"
+    ]
+        Value is within valid range
+    [/@check.then.and]
+[/cond.block.@check]
+```
+
+## Common Use Cases
+
+### 1. Financial Calculations
+```awesome
+[do.@calc]
+    // Calculate total with tax
+    [num.create main={amount} o.set="@calc.base" /]
+    [math.solve "{@calc.base} * 1.18" o.set="@calc.with_tax" /]
+    [num.round main={@calc.with_tax} precision="num:2" o.set="@calc.final" /]
+[/do.@calc]
+```
+
+### 2. Data Validation
+```awesome
+[cond.block.@validate]
+    [@validate.then.and cond.@=num.is.num cond.main={input}]
+        [@validate.then.and 
+            cond.@=num.is.between 
+            cond.main={input} 
+            cond.min="num:0" 
+            cond.max="num:100"
+        ]
+            Valid percentage value
+        [/@validate.then.and]
+    [/@validate.then.and]
+[/cond.block.@validate]
+```
+
+### 3. Statistical Operations
+```awesome
+[do.@stats]
+    [num.min 
+        var.1={value1} 
+        var.2={value2} 
+        var.3={value3} 
+        o.set="@stats.min"
+    /]
+    
+    [num.max 
+        var.1={value1} 
+        var.2={value2} 
+        var.3={value3} 
+        o.set="@stats.max"
+    /]
+    
+    [num.sum 
+        var.1={value1} 
+        var.2={value2} 
+        var.3={value3} 
+        o.set="@stats.total"
+    /]
+[/do.@stats]
+```
+
+## Error Handling
+
+1. Invalid Type Errors
+```awesome
+// Will throw error - main not numeric
+[num.abs main="hello" /]
+
+// Correct usage with typecasting
+[num.abs main="num:42.5" /]
+```
+
+2. Range Validation Errors
+```awesome
+// Will throw error - min greater than max
+[num.is.between main="num:5" min="num:10" max="num:5" /]
+
+// Correct usage
+[num.is.between main="num:5" min="num:1" max="num:10" /]
+```
+
+3. Missing Required Parameters
+```awesome
+// Will throw error - missing main
+[num.round precision="num:2" /]
+
+// Correct usage
+[num.round main="num:4.567" precision="num:2" /]
+```

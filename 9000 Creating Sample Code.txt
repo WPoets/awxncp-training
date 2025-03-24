@@ -1,0 +1,180 @@
+# String Library Examples Using code.sample
+
+## Overview
+This document demonstrates how to use the code.sample library to create interactive code examples for the string library. Each example shows the sample data, code, and expected results in collapsible sections.
+
+## Basic Structure
+```awesome
+[code.sample.@context show_data=yes]
+    [@context.data]
+        // Sample data in array format
+    [/@context.data]
+    [@context.title]Example Title[/@context.title]
+    [@context.description]Descriptive text here[/@context.description]
+    [@context.code]
+        // Your code here
+    [/@context.code]
+    [@context.expected_result]
+        // Expected output
+    [/@context.expected_result]
+[/code.sample.@context]
+```
+
+## Examples
+
+### Case Transformation
+[code.sample.@case show_data=yes]
+    [@case.data]
+        [text1]hello world[/text1]
+        [text2]JOHN DOE[/text2]
+        [text3]mixed CASE text[/text3]
+    [/@case.data]
+
+    [@case.title]1. String Case Transformations[/@case.title]
+    [@case.description]This example shows different case transformation functions available in the str.case library. See how text can be converted to uppercase, lowercase, title case, etc.[/@case.description]
+    [@case.code]
+// Using our sample data
+[env.set_array input]
+    [text1]hello world[/text1]
+    [text2]JOHN DOE[/text2]
+    [text3]mixed CASE text[/text3]
+[/env.set_array]
+
+Original: [env.get input.text1 /]
+Uppercase: [str.case.upper main={input.text1} /]
+Lowercase: [str.case.lower main={input.text2} /]
+Title Case: [str.case.title main={input.text1} /]
+Sentence Case: [str.case.sentence main={input.text3} /]
+Inverted Case: [str.case.invert main={input.text1} /]
+    [/@case.code]
+    [@case.expected_result]
+Original: hello world
+Uppercase: HELLO WORLD
+Lowercase: john doe
+Title Case: Hello World
+Sentence Case: Mixed case text
+Inverted Case: HELLO WORLD
+    [/@case.expected_result]
+[/code.sample.@case]
+
+### String Validation
+[code.sample.@validate show_data=yes]
+    [@validate.data]
+        [empty][/empty]
+        [spaces]   [/spaces]
+        [text]Hello![/text]
+    [/@validate.data]
+
+    [@validate.title]2. String Validation Functions[/@validate.title]
+    [@validate.description]Learn how to validate strings using various checking functions. This example demonstrates empty checks, whitespace validation, and string type verification.[/@validate.description]
+    [@validate.code]
+[env.set_array strings]
+    [empty][/empty]
+    [spaces]   [/spaces]
+    [text]Hello![/text]
+[/env.set_array]
+
+Empty String Tests:
+Is empty string empty? [str.is.empty main={strings.empty} /]
+Is text empty? [str.is.empty main={strings.text} /]
+
+Whitespace Tests:
+Is spaces whitespace? [str.is.whitespace main={strings.spaces} /]
+Is text whitespace? [str.is.whitespace main={strings.text} /]
+
+String Type Tests:
+Is text a string? [str.is.str main={strings.text} /]
+Is empty a string? [str.is.str main={strings.empty} /]
+    [/@validate.code]
+    [@validate.expected_result]
+Empty String Tests:
+Is empty string empty? true
+Is text empty? false
+
+Whitespace Tests:
+Is spaces whitespace? true
+Is text whitespace? false
+
+String Type Tests:
+Is text a string? true
+Is empty a string? true
+    [/@validate.expected_result]
+[/code.sample.@validate]
+
+### String Search and Containment
+[code.sample.@search show_data=yes]
+    [@search.data]
+        [haystack]The quick brown fox jumps over the lazy dog[/haystack]
+        [needle1]fox[/needle1]
+        [needle2]cat[/needle2]
+    [/@search.data]
+
+    [@search.title]3. String Search Functions[/@search.title]
+    [@search.description]Explore functions for searching within strings. See how to check if a string contains or doesn't contain specific text.[/@search.description]
+    [@search.code]
+[env.set_array search]
+    [haystack]The quick brown fox jumps over the lazy dog[/haystack]
+    [needle1]fox[/needle1]
+    [needle2]cat[/needle2]
+[/env.set_array]
+
+Contains Tests:
+Has 'fox'? [str.is.in main={search.needle1} haystack={search.haystack} /]
+Has 'cat'? [str.is.in main={search.needle2} haystack={search.haystack} /]
+
+Not Contains Tests:
+Missing 'cat'? [str.is.not_in main={search.needle2} haystack={search.haystack} /]
+Missing 'fox'? [str.is.not_in main={search.needle1} haystack={search.haystack} /]
+    [/@search.code]
+    [@search.expected_result]
+Contains Tests:
+Has 'fox'? true
+Has 'cat'? false
+
+Not Contains Tests:
+Missing 'cat'? true
+Missing 'fox'? false
+    [/@search.expected_result]
+[/code.sample.@search]
+
+## Tips for Creating Good Examples:
+
+1. Data Organization
+   - Use meaningful names for sample data
+   - Group related data together
+   - Include edge cases in your samples
+
+2. Code Structure
+   - Start with simple cases
+   - Add comments to explain complex operations
+   - Show both success and failure scenarios
+
+3. Expected Results
+   - Format output clearly
+   - Include helpful labels
+   - Show both success and error states
+
+4. Documentation
+   - Write clear descriptions
+   - Explain the purpose of each example
+   - Include any relevant notes or warnings
+
+## Common Patterns
+
+1. Setting Up Test Data:
+```awesome
+[env.set_array test_data]
+    [value1]sample1[/value1]
+    [value2]sample2[/value2]
+[/env.set_array]
+```
+
+2. Testing Functions:
+```awesome
+[str.is.empty main={test_data.value1} /]
+```
+
+3. Showing Results:
+```awesome
+Result: [env.get my_result /]
+```

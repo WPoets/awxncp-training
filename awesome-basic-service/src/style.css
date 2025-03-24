@@ -1,0 +1,133 @@
+/* Base styles for attributes */
+.awesome-attribute-row {
+    margin-bottom: 16px;
+    background: #fff;
+}
+
+.awesome-attribute-inputs {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.awesome-attribute-name,
+.awesome-attribute-type,
+.awesome-attribute-value {
+    flex: 1;
+    margin-bottom: 0 !important;
+}
+
+.awesome-attribute-type {
+    min-width: 120px;
+}
+
+.awesome-attribute-remove {
+    padding: 0 8px !important;
+    margin-top: 28px !important;
+}
+
+.awesome-attributes-container {
+    margin: 20px 0;
+}
+
+/* Tab styles */
+.awesome-tabs {
+    margin-top: 20px;
+}
+
+.awesome-tab-content {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e2e4e7;
+    border-top: none;
+}
+
+.awesome-tab-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.awesome-tab-title .components-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.awesome-tab-description {
+    margin: 0 0 20px;
+    padding: 10px;
+    background: #f0f6fc;
+    border-left: 4px solid #0073aa;
+}
+
+/* Section styles */
+.awesome-condition-section,
+.awesome-pipe-section,
+.awesome-out-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.awesome-condition-section h3,
+.awesome-pipe-section h3,
+.awesome-out-section h3 {
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e4e7;
+}
+
+/* Button styles */
+.awesome-add-attribute {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px !important;
+}
+
+/* Active tab styles */
+.awesome-tabs .active-tab {
+    background: #fff;
+    border-bottom-color: #fff;
+}
+
+/* Fix for WordPress admin styles */
+.awesome-attribute-inputs .components-base-control {
+    margin-bottom: 0;
+}
+
+.awesome-attribute-inputs .components-base-control__field {
+    margin-bottom: 0;
+}
+
+.components-panel__row .components-base-control {
+    width: 100%;
+}
+
+.awesome-attribute-type .components-select-control__input {
+    min-height: 36px;
+    margin-top: 0;
+}
+
+/* Tab panel specific overrides */
+.awesome-tabs .components-tab-panel__tabs {
+    border-bottom: 1px solid #e2e4e7;
+}
+
+.awesome-tabs .components-tab-panel__tabs-item {
+    height: auto;
+    padding: 8px 16px;
+}
+
+.awesome-tabs .components-tab-panel__tabs-item.active-tab {
+    box-shadow: inset 0 0 0 1.5px transparent, inset 0 -4px 0 0 #007cba;
+}
+
+/* Service tab specific */
+.awesome-tab-service textarea {
+    min-height: 100px;
+}

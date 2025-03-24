@@ -1,0 +1,219 @@
+The 'mysqli.multi' library allows you to query the mysql database and firing multiple queries simultaneously.
+it uses the $mysqli->multi_query structure.
+  
+In this we will understand the services available to fire multiple queries as a unit.
+
+One of the challenges with multiple queries is that there is a a possibility of sql injection attack.
+
+AwesomeEnterprise supports advanced methods to prevent sql injection attacks.
+
+a) All the user values must be escaped with the corresponding data type and set up as My SQL Variables so that they are all sanitized by using the esc library
+
+
+mysqli.multi.cud
+----------------------
+Multiple queries you dont expect a resultset back. Good for calling execution blocks or sps. 
+You are supposed to esc and setup all the user driven variables as MySQL Variables
+The service after execution closes the mysql thread to prevent any side effects.
+The service replies with an array with some data of the operation. If you dont set it to a variable it will be dumped out
+
+
+The service allows two variations depending on the isolation level to be created
+
+mysqli.multi.cud defaults to mysqli.multi.cud.read_committed
+
+mysqli.multi.cud.read_committed
+adds the query
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; before it fires the incoming query
+
+mysqli.multi.cud.repeatable_read 
+adds the query
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ; before it fires the incoming query
+
+
+eg:
+
+[env.set_array setup 
+	id='A123456789' 
+	name='John Doe' 
+	age=30
+  salary = 55000.75
+  join_date = '20230913'
+/]
+  
+[mysqli.multi.cud o.dump]
+SET @id = [esc.id setup.id /];
+SET @name = [esc.str setup.name /];
+SET @age = [esc.int setup.age /];
+SET @salary = [esc.num setup.salary /];
+SET @join_date = [esc.date setup.join_date /];
+
+CREATE TEMPORARY TABLE temp_table (
+    id CHAR(10) PRIMARY KEY,
+    name VARCHAR(255),
+    age INT,
+    salary FLOAT,
+    join_date DATE
+);
+
+
+-- Use variables in the INSERT query
+INSERT INTO temp_table (id, name, age, salary, join_date)
+VALUES (@id, @name, @age, @salary, @join_date);
+
+[/mysqli.multi.cud]
+
+
+
+In the above the query formed looks like this::
+
+
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SET @id = 'A123456789';
+SET @name = 'John Doe';
+SET @age = 30;
+SET @salary = 55000.75;
+SET @join_date = DATE('20230913');
+
+CREATE TEMPORARY TABLE temp_table (
+    id CHAR(10) PRIMARY KEY,
+    name VARCHAR(255),
+    age INT,
+    salary FLOAT,
+    join_date DATE
+);
+
+
+-- Use variables in the INSERT query
+INSERT INTO temp_table (id, name, age, salary, join_date)
+VALUES (@id, @name, @age, @salary, @join_date);
+
+
+The reply array looks like this
+
+[
+    "status"        => string(7) "success"
+    "message"       => string(7) "Success"
+    "matched_rows"  => int(0)
+    "affected_rows" => int(0)
+    "sql"           => string(464) "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SET @id = 'A123456789';
+SET @name = 'John Doe';
+SET @age = 30;
+SET @salary = 55000.75;
+SET @join_date = DATE('20230913');
+
+CREATE TEMPORARY TABLE temp_table (
+    id CHAR(10) PRIMARY KEY,
+    name VARCHAR(255),
+    age INT,
+    salary FLOAT,
+    join_date DATE
+);
+
+
+-- Use variables in the INSERT query
+INSERT INTO temp_table (id, name, age, salary, join_date)
+VALUES (@id, @name, @age, @salary, @join_date);"
+]
+
+
+mysqli.multi.fetch.<action>
+------------------------------------
+Multiple queries where you expect a resultset back. The final resultset generated is returned. If multiple resultsets were generated only the last is retained. 
+The multi fetch is similar to the single fetch. Once the result is generated the replies of a single query and multi query is exactly same.
+
+
+To prevent sql injection attacks You are supposed to esc and setup all the user driven variables as MySQL Variables.
+It is ok to directly use values which are internally created.
+
+The service after execution closes the mysql thread to prevent any side effects.
+The service replies with an array with some data of the operation. Depending on the action the array has the results
+
+The service adds a 
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; at the beginning to prevent locking
+
+The actions in this are exactly the same as single queries::
+
+mysqli.multi.fetch.rows :: The last select query which will give back multiple rows
+mysqli.fetch.row :: The last select query you are expecting 0 or 1 row.
+mysqli.fetch.exactly_one_row:: The last select query will return exactly 1 row. error otherwise
+mysqli.fetch.col:: The last select query will return 1 column. It creates an error if the returned dataset has more than 1 column
+mysqli.fetch.scalar:: The last select query will return exactly 1 row and 1 column.
+mysqli.fetch.count:: The last select query replies with a scalar value which is a count
+
+The replies to all the above is same as in a single query. 
+
+
+eg:
+
+[env.set_array setup 
+	id='A123456789' 
+	name='John Doe' 
+	age=30
+  salary = 55000.75
+  post_date = '	2016-05-30'
+/]
+  
+[mysqli.multi.fetch.rows o.dump=yes ]
+SET @id = [esc.id setup.id /];
+SET @name = [esc.str setup.name /];
+SET @age = [esc.int setup.age /];
+SET @salary = [esc.num setup.salary /];
+SET @post_date = [esc.date setup.post_date /];
+
+select ID from wp_posts where post_date<@post_date limit 3;
+
+[/mysqli.multi.fetch.rows]
+
+with return array::
+
+[
+    "status"     => string(7) "success"
+    "rows"       =>  array(3) 
+        [
+            0 =>  array(1) 
+            1 =>  array(1) 
+            2 =>  array(1) 
+        ]
+    "message"    => string(12) "3 rows found"
+    "found_rows" => int(3)
+    "sql"        => string(241) "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+SET @id = 'A123456789';
+SET @name = 'John Doe';
+SET @age = 30;
+SET @salary = 55000.75;
+SET @post_date = DATE('	2016-05-30');
+
+select ID from wp_posts where post_date<@post_date limit 3;"
+]
+
+
+
+mysqli.transaction.commit or mysqli.transaction.rollback
+------------------------------------
+To fire a set of queries as a MySQL Transaction
+
+[mysqli.transaction.<commit or rollback>]
+bunch of queries
+[/mysqli.transaction.<commit or rollback>]
+
+Used when we want to make sure all the queries happen together and get committed or cancelled.
+
+This is the query which is formed
+
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+
+	bunch of queries
+
+COMMIT: or ROLLBACK;
+
+
+
+
+
+
+
+
+

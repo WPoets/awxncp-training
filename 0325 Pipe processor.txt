@@ -1,0 +1,236 @@
+# Pipe Processor Guide in AwesomeEnterprise
+
+The `pipe:` processor allows you to chain operations by passing the result of one service to another. This enables powerful data transformations and chained operations.
+
+## Core Concepts
+
+### Basic Syntax
+```awesome
+[service1
+    pipe:@=service2
+    pipe:attribute1=value1
+    pipe:attribute2=value2
+/]
+```
+
+- The result of service1 is automatically passed as the 'main' parameter to service2
+- Additional parameters can be specified using pipe:attributeName
+- Multiple pipes can be chained using pipe.1: and pipe.2:
+
+## Basic Examples
+
+### 1. String Trimming and Case Conversion
+```awesome
+[str.create "  Hello World  "
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.upper
+/]
+```
+*Trims whitespace and converts to uppercase, resulting in "HELLO WORLD"*
+
+### 2. Number Formatting
+```awesome
+[num.create "num:1234.5678"
+    pipe:@=num.round
+    pipe:precision="num:2"
+/]
+```
+*Rounds number to 2 decimal places, resulting in 1234.57*
+
+## Advanced Usage
+
+### 3. Multiple Transformations
+```awesome
+[str.create "hello,world,example"
+    pipe:@=str.split.comma
+    pipe.1:@=arr_items.get
+    pipe.1:index="int:1"
+    pipe.2:@=str.case.title
+/]
+```
+*Splits string by comma, gets second item, converts to title case, resulting in "World"*
+
+### 4. Array Operations
+```awesome
+[arr.create
+    pipe:@=arr_items.reverse
+    pipe.1:@=arr_items.slice
+    pipe.1:start="int:0"
+    pipe.1:length="int:3"
+]
+    [@new _value="str:apple" /]
+    [@new _value="str:banana" /]
+    [@new _value="str:cherry" /]
+    [@new _value="str:date" /]
+[/arr.create]
+```
+*Creates array, reverses it, then takes first 3 items*
+
+## Working with Numbers
+
+### 5. Math Operations Chain
+```awesome
+[num.create "num:100"
+    pipe:@=math.solve
+    pipe:main="{@pipe.info.value} * 1.5"
+    pipe.1:@=num.ceil
+/]
+```
+*Multiplies by 1.5 then rounds up to nearest integer*
+
+### 6. Validation Chain
+```awesome
+[num.create "num:42.5"
+    pipe:@=num.round
+    pipe:precision="int:0"
+    pipe.1:@=int.comp.gt
+    pipe.1:with="int:40"
+/]
+```
+*Rounds number and checks if result is greater than 40*
+
+## String Processing
+
+### 7. Complex String Manipulation
+```awesome
+[str.create "user.email@example.com"
+    pipe:@=str.split.separator
+    pipe:separator="str:@"
+    pipe.1:@=arr_items.get
+    pipe.1:index="int:0"
+    pipe.2:@=str.case.upper
+/]
+```
+*Splits email at @, takes username part, converts to uppercase*
+
+### 8. Text Formatting Chain
+```awesome
+[str.create "   this is a test string   "
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.sentence
+    pipe.2:@=str.append
+    pipe.2:main="."
+/]
+```
+*Trims whitespace, converts to sentence case, adds period*
+
+## Data Validation Chains
+
+### 9. Input Validation
+```awesome
+[str.create {user.input}
+    pipe:@=str.trim.both
+    pipe.1:@=str.is.not_empty
+    pipe.2:@=str.length.between
+    pipe.2:min="int:3"
+    pipe.2:max="int:50"
+/]
+```
+*Trims input and validates length*
+
+### 10. Type Conversion and Validation
+```awesome
+[str.create "42"
+    pipe:@=num.create
+    pipe.1:@=num.is.between
+    pipe.1:min="num:0"
+    pipe.1:max="num:100"
+/]
+```
+*Converts string to number and validates range*
+
+## Best Practices
+
+1. Type Safety
+```awesome
+// Good - Proper type casting
+[num.create "num:100"
+    pipe:@=num.round
+    pipe:precision="int:2"
+/]
+
+// Bad - Missing type casting
+[num.create "100"
+    pipe:@=num.round
+    pipe:precision="2"
+/]
+```
+
+2. Clear Pipeline Steps
+```awesome
+// Good - Clear transformation steps
+[str.create {input}
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.lower
+    pipe.2:@=str.replace
+    pipe.2:search="str:_"
+    pipe.2:replace="str:-"
+/]
+
+// Avoid - Too many operations in one step
+[str.create {input}
+    pipe:@=str.replace
+    pipe:search="str: _"
+    pipe:replace="str:-"
+/]
+```
+
+3. Meaningful Pipeline Names
+```awesome
+// Good - Clear purpose
+[str.create {email}
+    pipe:@=str.case.lower
+    pipe.1:@=str.trim.both
+    out:@=email_id.validate
+/]
+
+// Avoid - Cryptic names
+[str.create {x}
+    pipe:@=str.case.lower
+    pipe.1:@=str.trim.both
+/]
+```
+
+## Common Use Cases
+
+### Data Cleaning
+```awesome
+[str.create {user.input}
+    pipe:@=str.trim.both
+    pipe.1:@=str.replace
+    pipe.1:search="str:  "
+    pipe.1:replace="str: "
+    pipe.2:@=str.case.lower
+/]
+```
+
+### Number Processing
+```awesome
+[num.create {amount}
+    pipe:@=num.abs
+    pipe.1:@=num.round
+    pipe.1:precision="int:2"
+    pipe.2:@=num.min
+    pipe.2:with="num:0"
+/]
+```
+
+### Array Transformation
+```awesome
+[arr.get {items}
+    pipe:@=arr_items.sort
+    pipe.1:@=arr_items.filter
+    pipe.1:@=str.is.not_empty
+    pipe.2:@=arr_items.slice
+    pipe.2:start="int:0"
+    pipe.2:length="int:10"
+/]
+```
+
+## Important Notes
+
+1. The result of each pipe operation is passed as the 'main' parameter to the next operation
+2. Use proper type casting for all numeric and boolean values
+3. Chain operations logically from more general to more specific
+4. Consider breaking very long chains into separate operations
+5. Use out: processor to capture intermediate results if needed

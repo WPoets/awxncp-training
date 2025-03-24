@@ -1,0 +1,141 @@
+The 'esc' library allows you to esc special characters like mysqli_real_escape_string. However the use of this more specialized and reduces additional characters as required.
+The library is only to be used in mysql queries. 
+It is not suitable to be used in html. 
+
+
+esc.int
+---------------
+Escape an integer. Replies with escaped integer.
+
+unnamed/main attribute takes an env path 
+preg_replace('/[^0-9-]/','',$main);
+
+eg::
+set @int=[esc.int user.some_integer /]; 
+
+
+esc.num
+---------------
+Escape a number. Replies with escaped number. 
+preg_replace('/[^0-9-\.]/','',$main);
+
+unnamed/main attribute takes an env path 
+
+eg::
+set @num=[esc.int user.some_num /];
+
+ 
+esc.table
+------------------
+You can also escaple table names incase for some reason a table name is a variable. Replies with escaped table name.
+preg_replace('/[^A-Za-z0-9_\.]/','',$main);
+
+unnamed/main attribute takes an env path 
+
+eg::
+select * from [esc.table user.some_table_name /];
+
+
+esc.str
+-----------------------------------
+escapes a string. Replies with escaped string and a single quote on each side.
+
+unnamed/main attribute takes an env path 
+
+[esc.str user.some_string /]
+
+$return_value=mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x27\x5C]','\\\0',$main);
+$return_value=AW2_APOS.$return_value.AW2_APOS;
+
+special characters are removed and a single quote is added on both side
+
+set @str=[esc.str env.user.some_string /]; where the string is hello will result in
+set @str='hello';
+
+
+esc.id
+-------------------------------------
+Only allows characters typically in an ID. Replies with escaped ID with a single quote on each side.
+unnamed/main attribute takes an env path 
+
+[esc.id user.some_id /]
+
+$return_value=preg_replace('/[^A-Za-z0-9\-\_\ ]/','',$main);
+$return_value=AW2_APOS.$return_value.AW2_APOS;
+
+special characters are removed and a single quote is added on both side
+
+set @str=[esc.id env.user.some_id /]; where the id is B89 will result in
+set @str='B89';
+
+
+esc.date
+--------------------------------
+sets it up as a date variable in mysql query. replies with DATE('escaped value')
+
+unnamed/main attribute takes an env path 
+
+[esc.date user.some_dateYYYYMMDD /]  The date should be a simple YYYYMMDD
+
+$return_value= "DATE('".$main."')";
+
+set @date=[esc.date env.user.some_date /]; where the date is 20241201 will result in
+set @date=DATE('20241201');
+
+
+
+esc.like
+--------------------------------
+Sets up a like string. difference between str and like is that also escapes % and _ 
+Replies with the escaped string. unlike str does not put single quotes
+
+unnamed/main attribute takes an env path 
+
+[esc.like user.some_string /]
+
+
+$return_value=mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x27\x5C]','\\\0',$main);
+
+
+eg:
+set @like='[esc.id env.user.some_string /]'; where the string is %he_5 will result in
+set @like='\%he\_5';
+
+
+
+esc.unsafe and esc.unsafe.quotes
+---------------------------
+To escape an array for in queries you can use the esc.safe for non string and esc.safe.quotes for string arrays
+
+for esc.unsafe replies with n1,n2,n3 where n1,n2 and n3 is an array of number
+for esc.unsafe.quotes replies with 'str1','str2','str3'  where str1,str2,str3 is an array of strings
+
+unnamed/main attribute takes an env path 
+
+
+eg::
+[env.set_array numbers a=54 b=45 c=67 /]
+select * from table where id in ([esc.unsafe numbers /])
+
+will return 
+select * from table where id in (54,45,67);
+
+
+[env.set_array strings a=%hello b=__aa c=%h_g /]
+select * from table where id in ([esc.unsafe.quotes strings /]);
+
+will return 
+select * from table where id in ('\%hello','\_\_aa','\%h\_g');
+
+
+esc.safe and esc.safe.quotes
+---------------------------
+In case you already have strings which are escaped then you can use these to indicate that they were already escaped and it is not an oversight.
+
+unnamed/main attribute takes an env path 
+
+They are similar to esc.unsafe and esc.unsafe.quotes but dont actually escape anything
+
+
+
+

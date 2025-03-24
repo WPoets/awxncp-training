@@ -1,0 +1,63 @@
+This is the `content` library and helps you work with content
+
+content.get
+----------------
+Lets you get the content as a raw string without resolving the shortcodes.
+Useful when you just want to output the content as it is or store a piece of code in a variable to be parsed later
+
+content.raw replies back with the raw content within it.
+
+
+example 1::
+[content.get]
+	[str.create hello /]
+[/content.get]
+
+The above will output  [str.create hello /]
+
+
+example 2::
+[content.get o.set=unparsed_code]
+	[str.create hello /]
+[/content.get]
+[env.get unparsed_code m.run=yes /]
+
+Unparsed Code will get stored in env.unparsed_code
+Getting the code and running it using (m.run) will run the code
+
+
+example 3::
+[content.get o.set=unparsed_code]
+	[str.create hello /]
+[/content.get]
+[code.run unparsed_code /]
+
+Unparsed Code will get stored in env.unparsed_code
+code.run will run the code
+
+
+content.run
+----------------
+Run the content inside and reply with the result.
+Use this if you want to store results of parsing a particular piece of content in a variable
+
+content.run replies back with the parsed content within it.
+
+example 1::
+[content.run]
+	[str.create hello /]
+[/content.run]
+
+The above will output  hello
+
+
+example 2::
+Store results into different variables
+
+
+[content.run o.set=block.1]
+	[str.create 'this is block 1' /]
+[/content.run]
+[content.run o.set=block.2]
+	[str.create 'this is block 2' /]
+[/content.run]

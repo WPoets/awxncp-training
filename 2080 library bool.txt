@@ -1,0 +1,36 @@
+bool.get
+----------------------
+Gets the Value from a Env Path. Converts it into a bool.
+If the bool value is false and there is a default value then the default value is returned.
+
+Returns value as a Float
+[bool.get <env path> default=<default_value> /]
+Parameters:
+
+
+main/unnamed: An environment Path to get
+default: Default value if the main value is false
+
+
+Example:
+
+[bool.get main='some.path' default='true' /]
+
+
+bool.create
+-----------------------
+Create & return value as a bool
+[bool.create "true" /]
+Parameters:
+
+main/unnamed: The value to create as a bool
+true returns boolean true
+false returns boolean false
+else the value is (bool)value
+
+[bool.create "true" /] will return (bool)true
+[bool.create "false" /] will return (bool)false
+[bool.create "1" /] will return (bool)true
+[bool.create "0" /] will return (bool)false
+
+

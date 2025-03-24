@@ -1,0 +1,534 @@
+Understanding Shortcodes
+---------------------------------------
+Shortcodes can written like XML in two ways - Self closing 
+[str.create 'Vikas Kumar' /] 
+
+or with content inside like
+
+[content.run]
+	This is content
+	[str.create hello /]
+[/content.run]
+
+Construct of a shortcode
+-------------------------------
+A shortcode consist of the following
+
+[servicename
+	onlyvalue
+	key1=value1
+	key2=value2
+	key3=value3
+]
+service content
+[/servicename]
+
+A servicename 
+zero or more processor attributes
+zero or more service attributes
+optional service content
+
+
+Service Name
+--------------------
+[debug2.ignore /]
+In the above the service name is debug2.ignore
+
+[str.create 'Vikas Kumar' /]
+In the above the service name is str.create
+
+The service name is a path separated by dots. 
+
+The service name is always in lowercase
+The service name only allows the following characters a-z,0-9,@,$,-,_
+. is used a separator 
+
+The service name must have a minimum of 1 dot
+[ignore /] is an invalid service name as minumum 1 dot required
+[debug.#ignore /] is invalid as an invalid character
+[DEBUG.#ignore /] is invalid as uppercase is not allowed
+
+Processor Attributes
+-------------------------
+The shortcode can have zero or more processor attributes
+Processor attributes are attributes which start with
+
+'when:','pipe:','pipe.1:','out:','out.1:'
+
+
+[env.set 
+	x=1 
+	y=2	
+	when:@=int.is.odd when:main=int:5
+	pipe:@=str.trim.both
+	out:@module.set=person.name
+/]
+
+In the above 
+	when:@=int.is.odd
+	when:main=int:5
+	pipe:@=str.trim.both
+
+	out:@module.set=person.name
+
+are processor attributes
+
+and
+	x=1 
+	y=2	
+
+are service attributes
+
+These are the valid ways of writing processor attributes
+
+<processor start>.key1=value1  - This is valid as long as value1 does not have any spaces
+<processor start>.key1='val ue1"' - You can use single quotes to wrap values with spaces or double quotes 	
+<processor start>.key1="val''ue1" - You can use double quotes to wrap values with spaces or single quotes 
+
+Example:
+
+[env.set 
+	x=1 
+	y=2	
+	when:@=int.is.odd when:main=int:5
+	pipe:@=str.trim.left
+	pipe.1:@=str.trim.right
+	out:@module.set=person.name
+/]
+
+In the above 
+	when:@=int.is.odd when:main=int:5
+	pipe:@=str.trim.left
+	pipe.1:@=str.trim.right
+	out:@module.set=person.name
+
+are the processor attributes
+
+
+All the keys of processor attributes must be in lowercase. Any uppercase keys are converted to lowercase hence it is preferable to just use lowercase keys
+
+
+Service Attributes
+-------------------------
+The shortcode can have zero or more service attributes
+
+[servicename
+	onlyvalue
+	key1=value1
+	key2=value2
+	key3=value3
+]
+content
+[/servicename]
+
+
+
+These are the valid ways of writing service attributes
+
+
+unnamed/main key::
+You can defined one service attribute without a key(onlyvalue). In this case the key will be assumed to be 'main'  
+
+value1 - This is valid as long as value1 does not have any spaces
+"val''ue1" - You can use double quotes to wrap values with spaces or single quotes 
+
+You cannot use single quotes to define a service attribute without a key. Use double quotes
+
+ 
+All the above is equivalent to writing 
+main='value'
+
+So 
+[str.create 'Vikas Kumar' /]
+is equivalent to 
+[str.create main='Vikas Kumar' /]
+
+
+Defining service attributes as key value pairs::
+
+key1=value1  - This is valid as long as value1 does not have any spaces
+key1='val ue1"' - You can use single quotes to wrap values with spaces or double quotes 	
+key1="val''ue1" - You can use double quotes to wrap values with spaces or single quotes 
+
+Example:
+[env.set name=vikas age='25' sex="male"/]
+
+The above will have three service attributes::
+
+name=vikas 
+age='25' 
+sex="male"
+
+
+All the keys of attributes must be in lowercase. Any uppercase keys are converted to lowercase hence it is preferable to just use lowercase keys
+
+
+Attribute Values
+------------------------------------------------------
+Here are the guidelines for the Values in the key values of the Shortcode. This is applicable for all values whether Service attributes or processory attributes
+
+[str.create main=hello /]
+[str.create main='hello'/]
+[str.create main="hello" /]
+
+[str.create hello /]
+[str.create "hello" /]
+
+In all the above hello is the value.
+
+[str.create hello out:@module.set=reply_val /]
+[str.create hello out:@module.set='reply_val' /]
+[str.create hello out:@module.set="reply_val" /]
+
+In all the above for out:@module.set  reply_val is the value.
+
+All values are strings by default
+Awesome follows strict type casting. So all non string values must be typecasted.
+
+
+so in [env.set allstrings.x=9 allstrings.y='9' allstrings.z="9" /] all the values set will be string
+
+[
+    "x" => string(1) "9"
+    "y" => string(1) "9"
+    "z" => string(1) "9"
+]
+
+
+you can change the datatype of the value by adding a typecast as below
+
+[env.set_array hello 
+	x=int:1 y=str:hello z=bool:false a=num:2.0 b=comma:2,3,4 
+/]
+
+
+int: before the value will typecast to int
+(int)value
+
+float: before the value will typecast to float
+(float)value
+
+str: before the value will typecast to string
+(string)value
+
+
+bool: before the value will typecast to bool
+if($value === 'false')
+	$value=false;
+else
+	$value=(bool)$value;
+
+[env.set_array hello 
+	y=bool:false z=bool:0 a=bool:1 b=bool:hello 
+/]
+
+will result in
+[
+    "y" => bool(false)
+    "z" => bool(false)
+    "a" => bool(true)
+    "b" => bool(true)
+]
+
+
+arr:empty 
+will reply back with an empty array
+
+comma: before the value will convert it into an array
+remember all the values converted will be into string
+
+[env.set_array strarray 
+	y=comma:a,1,2,b 
+/]
+
+
+[
+    "y" =>  array(4) 
+        [
+            0 => string(1) "a"
+            1 => string(1) "1"
+            2 => string(1) "2"
+            3 => string(1) "b"
+        ]
+]
+
+explode(',', (string)$value);
+
+
+There are two more such typecast though they dont change datatypes
+
+get: gets the path from the environment
+
+[env.set x.child=int:9 /]
+[env.set y=get:x.child /]
+The get will get the path from the env and retain the datatype.
+This allows you to get an env path without curly braces. 
+
+x: can run a service and return the reply from the service. Retains the datatype from the reply
+
+[env.set hi= "x:request2.get hello" /]
+
+The above will run the service request2.get and reply with the value including datatype
+
+The above will allow you to create more complex scenarios without breaking the code
+
+[env.set hi= "x:request2.get {parameter_to_get}" /]
+
+
+
+single curly braces::{}
+You can use a {} within a value to get a value from the env.
+
+You can refer to an env variable in an attribute by using curly braces.
+
+if the value is only a curly brace then the type is maintained
+[env.set person.name=vikas person.age=int:25 /]
+[env.set person2.age={person.age} /]
+
+in this case person2.age will be an integer.
+
+if the value has anything other than only a curly brace then a string is returned
+[env.set person.name=vikas person.age=int:25 /]
+[env.set person2.age=age:{person.age} /]
+
+
+  [env.set
+  	is_deliverable.email.deliverable=bool:true
+    verified.expiry.row=arr:empty
+  ]
+  
+
+in this case person2.age will be string.
+
+Curly braces must only have an environment path within it. Spaces are also not allowed
+Curly braces within curly braces is not allowed.
+No brackets are allowed within curly braces
+
+[env.set person2.name={ person.name }/] is invalid
+[env.set y={str.create hello} /] is invalid
+[env.set y={person.{dynamic.name}} /] is invalid
+
+Multiple curly braces in the same value is valid 
+
+[env.set person.name=vikas person.age=25 /]
+[env.set person2.nameage="{person.name} {person.age}"/] 
+
+
+double curly braces::{{}}
+Double curly braces can be used to refer to a service. The double curly braces will execute the service and return the value. The return value is always a string since it is treated as a block of code.
+
+Since service will usually have a space it is recommended to always add double quotes across values which have double curly braces
+
+[env.set_array person 
+	name="{{request2.get name}}" age="{{request2.get age}}" 
+/]
+ 
+this replies with
+[
+    "name" => string(5) "vikas"
+    "age"  => string(2) "25"
+]
+
+if query string had name=vikas and age=25
+
+Double curly braces cannot have single curly braces in it.
+
+[env.set_array person 
+	name="{{request2.get {name} }}" age="{{request2.get age}}" 
+/]
+is invalid
+
+since typecasting , curly braces and double curly braces can be used together we can do the following
+
+[env.set_array person 
+	name="{{request2.get name}}" age="int:{{request2.get age}}"
+/]
+
+[env.set_array person 
+	details="name-{person.name} age-{person.age} sex-{{request2.get sex}}"
+/]
+
+will reply with
+ array(3) 
+[
+    "name"    => string(5) "vikas"
+    "age"     => int(25)
+    "details" => string(26) "name-vikas age-25 sex-male"
+]
+
+Service Content
+--------------
+Incase the shortcode has enclosing text between the opening and closing it is called the service content and passed to the service when the service is being run.
+
+[content.run]
+	This is content
+[/content.run]
+
+In the above 'This is content' is the service content. 
+
+
+
+Execution of a single shortcode
+=============================================
+
+Step1:: Conditions Processor
+Decide whether to execute the shortcode or not.
+
+All the processor attributes which start with 'when:' are sent to the Condition Processor
+If the Condition Processor returns false the execution of the shortcode is skipped
+
+
+Step2:: Service Processor
+The Service Name , the Service attributes and the Service Content is sent to the Service Processor.
+The Service Processor returns back with a Value. The Value can be of any datatype. This Value is the Current Output of the Shortcode
+
+Step3:: Modifiers Processor
+Modify the Value returned in Step2
+All the processor attributes which start with 'pipe:' and the Current Output are sent to the Modifiers Processor. The Current Output is always sent in the main attribute. If the 
+
+The Modifiers Processor returns back with a Value. The Value can be of any datatype. This Value is the Current Output of the Shortcode
+
+All the processor attributes which start with 'pipe.1:' and the Current Output are sent to the Modifiers Processor.
+The Modifiers Processor returns back with a Value. The Value can be of any datatype. This Value is the Current Output of the Shortcode
+
+Step4:: Outputters Processor
+Incase there are no Outputters attributes the Shortcode replies with the Current Value.
+
+All the processor attributes which start with 'out:' and the Current Output are sent to the Output Processor.
+
+All the processor attributes which start with 'out.1:' and the Current Output are sent to the Output Processor.
+
+If out.1 exists then the reply of out.1: is set to the current value.
+If out.1 does not exist then the reply of out: is set to the current value.
+
+
+[str.create "hello" out:@module.set='r1' /]
+The above will pass the Current Value to @module.set . Since the service does not return any value the shortcode will reply with empty.
+
+
+
+The Shortcode always returns with the Current Value
+
+Note Important:: Any shortcode without an output processor will output a value in the output stream. Not handling output will result in unexpected results.
+
+ 
+==================================================================
+Example1 execution of a Shortcode
+=========================================
+
+[str.create
+	main='  Vikas Kumar  '
+	when:@=int.is.odd when:main=int:5 
+	pipe:@=str.trim.left
+	pipe.1:@=str.trim.right
+	out:@module.set=r1
+	out.1:@=debug2.dump
+/]
+
+
+Step1:: Conditions Processor
+when:@=int.is.odd when:main=int:5 will be passed to the Conditions Processor.
+The Conditions Processor will return true. Hence move onto step 2
+
+Step2:: Service Processor
+The Service Name 'str.create'
+the Service attributes
+	main='  Vikas Kumar  '
+
+is sent to the Service Processor.
+	
+The Service Processor returns back with a Value  '  Vikas Kumar  '
+
+Step3:: Modifiers Processor
+The Modifiers Attributes 
+	pipe:@=str.trim.left
+
+is sent to the 	Modifiers Processor
+	
+The Modifiers Processor returns the value 'Vikas Kumar'
+
+
+The Modifiers Attributes 
+	pipe.1:@=str.trim.right
+is sent to the 	Modifiers Processor
+	
+The Modifiers Processor returns the value 'ikas'
+
+
+
+Step4:: Outputters Processor
+The Outputters Attributes 
+	out:@module.set=r1
+is sent to the 	Outputters Attributes
+The Outputter Processor will set the Current value to the modle variable r1.
+
+
+The Outputters Attributes 
+	out.1:@=debug2.dump
+is sent to the 	Outputters Attributes
+The Outputter Processor will set the value.
+
+Since out:1 is defined the shortcode will reply with the output of debug2.dump . 
+
+
+Example2 execution of a Shortcode
+=========================================
+
+[content.run 
+	when:@=int.is.odd when:main=int:5
+]
+	we are equal
+[/content.run]
+
+
+
+Step1:: Conditions Processor
+when:@=int.is.odd when:main=int:5 will be passed to the Conditions Processor.
+The Conditions Processor will return true. Hence move onto step 2
+
+Step2:: Service Processor
+The Service Name 'content.run'
+
+with the Service content
+	we are equal
+
+is sent to the Service Processor.
+	
+The Service Processor returns back with a Value  'we are equal'
+
+Step3:: Modifiers Processor
+Since there are no Modifiers Attributes these step will be ignored
+	
+
+Step4:: Outputters Processor
+Since there are no Outputters Attributes these step will be ignored
+
+
+The shortcode will return 'we are equal'
+
+
+========================================================================
+Errors in shortcodes
+----------------------------
+within a shortcode you cannot put a open or close square braces
+
+you cannot use shortcodes in an attribute. use curly braces
+All the below will give an error
+[env.get '[employees.3.name' /]
+[env.get 'employees.3.name]' /]
+[env.get '[employees.3.name]' /]
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+

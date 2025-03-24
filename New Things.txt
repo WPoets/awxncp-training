@@ -1,0 +1,702 @@
+New things::
+
+Using Shortcodes
+-----------------------
+when: replaces  c.
+
+[str.create main='Vikas Kumar'  
+    when:@=int.is.odd when:main=int:5
+    when:or.@=int.is.odd when:or.main=int:7
+
+	out:@env.set ='person.name'
+/]
+
+
+pipe: replaces m.
+pipe.1:
+
+
+[arr.get products
+	pipe:@=arr_items.remove.key pipe:key=laptop
+	out:@env.set=products
+]
+
+
+out: and out.1: replaces o.
+
+
+special services:
+out:@env.set=<env path to set the value>
+out:@module.set=<module path to set the value>
+out:@template.set=<template path to set the value>
+out:@debug.dump=<dump and destroy the output>
+out:@debug.echo=<echo and destroy the output>
+out:@destroy=yes  : destroy the output
+
+generic services:
+You can use any generic service which takes a value in main/unnamed attribute. If it replies with anything that will be discarded
+
+out:@=<any service>
+out:att1=<some value>
+out:att2=<some value>
+
+
+[arr.get products
+	pipe:@=arr_items.remove.key pipe:key=laptop
+	out:@env.set=products
+]
+
+
+content:
+To resolve double parsing
+
+Content: as attribute to allow parsing of content stored in env.
+9005 Content colon
+https://prod.thearks.in/training/content-as-attribute?1
+
+
+[content.run]
+	[module.get mycontent /]
+[/content.run]
+
+[content.run content:@=module.mycontent /]
+
+
+Curly braces and double curly braces
+
+[str.trim.both "{{str.create main=' hello '}}"]
+
+
+
+======================================================================================
+
+Type casting
+---------------------------------------
+get:
+request2:
+x:
+int:
+num:
+str:
+null: does not work properly
+comma:
+bool:
+	false = false
+	else (bool)
+
+===========================================================================================
+
+
+Support in Arrays::
+======================================================================================
+support for when:
+Curly braces and double curly braces
+
+shortcode parsing within content:: will return string 
+
+[module.set_array cities_array]  
+	[delhi name='Delhi' country='India']
+  	[desc]
+    	The shortcodes within this will get parsed. [str.create "I will get parsed" /]
+    [/desc]
+  [/delhi]
+[/module.set_array]  
+
+
+@do to execute code and return parsable nodes
+
+
+[before]i am before[/before]
+[@do]
+ //**Equifax or civil Eligibility**//
+ [cond.true cond.@=str.comp.eq cond.main={module.mode} cond.with="equifax"]
+   [equifax]
+     [service]dist_eligible.equifax.check[/service]       
+   [/equifax]
+ [/cond.true]
+[/@do]
+[after]i am after[/after]
+  
+  
+@do to execute code and return array
+
+  [before]i am before[/before]
+	[@do]
+		[env.get some_array out:@env.set=_return /]
+	[/@do]
+  [after]i am after[/after]
+
+raw to parse later
+[delhi name='Delhi' country='India']
+[info raw]
+	This is the description which i will parse later [module.info /]
+[/info]
+[interest]
+	[raw]
+	This is the description which i will parse later [module.info /]
+  [/raw]
+[/interest]
+	
+
+  [cities]
+  	[@new pop=9000 name=nagpur /]
+  	[@new pop=9000 name=nashik /]
+  	[@new _value=goa /]
+  [/cities]
+  
+
+  [@key "All Cities"]
+  	[kolkata pop=int:9000 name=kolkata /]
+  	[asansol pop=int:9000 name=asansol /]
+  	[@key2 "Madhya Pradesh" _value=mp /]
+  [/@key]
+
+  
+-------------------------------------------------------------------------------------
+
+
+String manipulation::
+==========================================================
+str library
+Training: 2060 library str
+https://prod.thearks.in/training/str-library
+
+
+Core Services:
+
+str.get - Gets a value from environment path and converts to string with optional default
+str.create - Creates and returns a value as a string
+
+Type Checking:
+3. str.is.str - Checks if a value is a string
+4. str.is.not_str - Checks if a value is not a string
+Content Checking:
+5. str.is.yes - Checks if string equals "yes"
+6. str.is.no - Checks if string equals "no"
+7. str.is.empty - Checks if string is empty
+8. str.is.not_empty - Checks if string is not empty
+9. str.is.whitespace - Checks if string is empty or contains only whitespace
+10. str.is.not_whitespace - Checks if string contains non-whitespace characters
+String Search:
+11. str.is.in - Checks if a string exists within another string/content
+12. str.is.not_in - Checks if a string does not exist within another string/content
+String Manipulation:
+13. str.append - Appends string to target string with optional separator
+14. str.prepend - Prepends string to target string with optional separator
+All string services require proper typecasting using the str: prefix for string values to ensure type safety and prevent errors.
+
+
+
+str.comp library for string comparison
+Training: 2065 library str comp
+https://prod.thearks.in/training/str-comp-library
+
+
+str library additional services
+- str.case - Case transformations
+- str.comp - String comparisons
+- str.needle - String search and manipulation
+- str.pad - String padding
+- str.slice - String extraction
+- str.split - split and convert into an array
+- str.trim - trim an array
+
+Training: 2068 library str additional services
+
+https://prod.thearks.in/training/str-additional-services
+
+
+
+int manipulation
+=========================================================
+int library
+
+Core Services:
+
+int.get - Gets a value from environment path and converts to integer with optional default
+int.create - Creates and returns a value as an integer
+
+Type Checking:
+3. int.is.int - Checks if a value is an integer
+4. int.is.not_int - Checks if a value is not an integer
+5. int.is.odd - Checks if an integer is odd
+6. int.is.even - Checks if an integer is even
+Number Properties:
+7. int.is.positive - Checks if an integer is greater than zero
+8. int.is.negative - Checks if an integer is less than zero
+9. int.is.zero - Checks if an integer equals zero
+10. int.is.between - Checks if an integer falls within a specified range (inclusive)
+Math Operations:
+11. int.abs - Returns absolute value of an integer
+12. int.max - Returns maximum value from multiple integers
+13. int.min - Returns minimum value from multiple integers
+14. int.sum - Calculates sum of multiple integers
+15. int.random - Generates random integer within specified range
+16. int.plus_one - Increments integer by one
+17. int.minus_one - Decrements integer by one
+Type Conversions:
+18. int.to.num - Converts integer to float number
+19. int.to.str - Converts integer to string
+All services require proper typecasting using the int: prefix for integer values. This helps prevent type-related errors in calculations and comparisons.
+
+int.comp library for integer comparison
+Training:2055 Library int.comp
+https://prod.thearks.in/training/int-comp-library
+
+
+
+num manipulation
+=========================================================
+num library
+
+Core Services:
+
+num.get - Gets a value from environment path and converts to float with optional default
+num.create - Creates and returns a value as a float
+
+Type Checking:
+3. num.is.num - Checks if a value is a number
+4. num.is.not_num - Checks if a value is not a number
+Number Properties:
+5. num.is.positive - Checks if number is greater than zero
+6. num.is.negative - Checks if number is less than zero
+7. num.is.zero - Checks if number is zero
+8. num.is.between - Checks if number falls within specified range (inclusive)
+Rounding Operations:
+9. num.ceiling - Rounds up to nearest integer
+10. num.floor - Rounds down to nearest integer
+11. num.round - Rounds number to specified precision
+12. num.truncate - Truncates number to specified decimal places
+Math Operations:
+13. num.abs - Returns absolute value of number
+14. num.max - Returns maximum among multiple numbers
+15. num.min - Returns minimum among multiple numbers
+16. num.sum - Calculates sum of multiple numbers
+17. num.rand - Generates random number within specified range
+Type Conversions:
+18. num.to.str - Converts number to string
+19. num.to.int - Converts number to integer
+
+
+num.comp library for number comparison
+2075 library num comp
+https://prod.thearks.in/training/num-comp-library
+
+------------------------------------------------------------
+
+bool::
+===================================================
+Core Services:
+
+bool.get - Gets a value from environment path and converts to boolean with optional default
+bool.create - Creates and returns a value as a boolean (special handling for 'true'/'false' strings)
+
+Type Checking:
+3. bool.is.bool - Checks if a value is a boolean
+4. bool.is.not_bool - Checks if a value is not a boolean
+Value Checking:
+5. bool.is.true - Checks if boolean value is true
+6. bool.is.false - Checks if boolean value is false
+Type Conversion:
+7. bool.to.str - Converts boolean to string representation ('true'/'false')
+
+
+
+cond.block replaces if block
+==========================================================
+cond.true and cond.false
+
+Training: 2015 library cond
+
+https://prod.thearks.in/training/cond-true-false
+https://prod.thearks.in/training/cond-block-library
+
+
+
+
+Creating Code Samples
+===========================================================
+9000 Creating Sample Code
+
+https://prod.thearks.in/training/code-sample
+
+
+
+
+while blocks
+===============================================================
+while.scalar
+[while.scalar.@seq initial=int:0 out:@module.set=m1]
+    [@seq.cond cond.@=int.comp.lt cond.main={@seq.info.index} cond.with=int:10 /]
+	[@seq.then]
+  
+  	[int.plus_one {@seq.info.result} 
+    	pipe:@=@seq.scalar
+    /]
+	[/@seq.then]
+[/while.scalar.@seq]
+
+
+while.build
+
+[while.build.@seq]
+    [@seq.cond cond.@=int.comp.lt cond.main={@seq.info.index} cond.with=int:5 /]
+	[@seq.then]
+		will get concatenated [env.@seq.info.index /]
+	[/@seq.then]
+[/while.build.@seq]
+
+
+while.arr
+
+[while.arr.@seq out:@module.set=m1]
+    [@seq.cond cond.@=int.comp.lt cond.main={@seq.info.index} cond.with=int:5 /]
+	[@seq.then]
+  	[@seq.arr main={@seq.info.position} /]
+	[/@seq.then]
+[/while.arr.@seq]
+
+==================================================================================
+
+
+arrays
+================================================================================
+Core Array Services:
+
+arr.create - Builds an array from content
+arr.get - Gets an item from array by path
+arr.set - Sets values in an array
+arr.empty - Creates an empty array
+arr.length - Gets length of array
+arr.search_deep - Searches for value in nested array structures
+
+Type Checking:
+7. arr.is.arr - Checks if value is an array
+8. arr.is.not_arr - Checks if value is not an array
+9. arr.is.empty - Checks if array is empty
+9. arr.is.not_empty - Checks if array is not empty
+10. arr.is.associative - Checks if array is associative
+11. arr.is.sequential - Checks if array is sequential
+
+Array Element Checks:
+12. arr.has.key - Checks if specific key exists
+13. arr.has.keys - Checks if multiple keys exist
+14. arr.has.value - Checks if specific value exists with type matching
+15. arr.has.values - Checks if multiple values exist
+16. arr.has.empty - Checks if array has any empty values
+17. arr.has.null - Checks if array has any null values
+
+Array Manipulation:
+18. arr_items.reverse - Reverses array order
+19. arr_items.keys - Extracts all keys from array
+20. arr_items.values - Extracts all values from array
+21. arr_items.insert - Inserts items at specified position
+22. arr_items.remove - Removes elements from specified position
+23. arr_items.replace - Replaces elements at specified position
+24. arr_items.get - Gets elements from specified position
+25. arr_items.find - Finds items in array
+
+Conversion Services:
+26. arr.to.json - Converts array to JSON string
+27. arr.to.csv - Converts array to CSV string
+28. arr.to.query_string - Converts array to URL query string
+
+Join Services
+arr.join.comma - Joins array elements using comma (,) separator
+arr.join.dot - Joins array elements using dot (.) separator
+arr.join.space - Joins array elements using single space separator
+arr.join.separator - Joins array elements using custom separator
+
+Array Iteration Services:
+======================================================================
+arr_each.map - Maps over array elements to create transformed array
+
+	map - Transform current value using service
+	modify - Change key or value during mapping
+	discard - Remove current item from results
+
+https://prod.thearks.in/training/arr_each_map
+
+
+arr_each.filter - Filters array elements based on conditions
+
+	select - Include current item in results
+	modify - Change key or value during filtering
+	filter - Conditionally select items using service
+
+
+arr_each.reduce - Reduces array to single value
+	modify - Update accumulator value
+	reduce - Accumulate values using service
+
+
+arr_each.build - Builds string output from array iteration
+	Processes items and concatenates results
+	Maintains iteration context/state
+
+
+structure::
+
+	@context.$
+	@context.info
+
+    $info['index']
+    $info['position']=$index+1;
+    
+    $info['first']=false;
+    $info['last']=false;
+    $info['between']=false;
+    $info['odd']=false;
+    $info['even']=false;
+    $info['count']
+	$info['value'] = $item;
+	$info['key'] = $key;
+	$info['result']
+
+
+Array Creation
+==============================================
+
+range
+	.start
+	.stop
+	.step
+	
+arr.@=<service>
+
+
+main={array}
+
+content in array style
+
+
+key value pairs
+
+	key.name=chandra
+	key.age=30
+
+from_path=<env path>
+
+
+---------------------------------------------------------------------
+
+
+Currency
+==================================================
+Core Services:
+
+currency.create - Creates a valid currency value (float with 0-2 decimals)
+currency.get - Gets currency value from environment with optional default
+currency.display - Formats currency with 2 decimal places and thousands separator
+
+Validation Service:
+4. currency.is.currency - Checks if value is valid currency (float with 0-2 decimals)
+Conversion Service:
+5. currency.rupees.words - Converts currency amount to Indian Rupees in words format
+
+
+
+
+Date
+===============================================
+Core Services:
+
+date.create - Creates and returns a DateTime object from string input
+date.get - Gets DateTime value from environment path with optional default
+date.modify - Modifies DateTime using frequency pattern (e.g., +1 day, -2 months)
+
+Date Calculations:
+4. date.diff - Calculates difference between two dates with multiple formats:
+
+	mins: Minutes between dates
+	hours: Hours between dates
+	days: Days between dates
+	years: Years between dates
+	english: Human-readable format (e.g., "2 years 3 months")
+
+
+Period Generation:
+5. date.aw2_period - Generates date ranges based on period patterns:
+
+	day:<n> - Specific day
+	days:<n> - Last n days
+	month:<pattern> - Monthly ranges
+	months:<n> - Last n months
+	year:<pattern> - Yearly ranges
+
+
+
+date.comp
+
+
+Email id
+=======================================
+Core Services:
+
+email_id.create - Creates and validates email address with optional display name
+email_id.get - Gets email from environment with support for array format
+email_id.normalize - Normalizes email address (lowercase, trim)
+email_id.is.valid - Checks if email format is valid
+
+Email Parts:
+5. email_id.part.domain - Extracts domain part from email
+6. email_id.part.user - Extracts username part from email
+7. email_id.decompose - Splits email into display name and address components
+Security & Validation:
+8. email_id.mask - Masks email for privacy (e.g., ab***@domain.com)
+9. email_id.is.disposable - Checks if domain is disposable email service
+10. email_id.is.role - Checks if email is role account (e.g., admin@, info@)
+11. email_id.has_mx - Verifies domain has valid MX record
+Comparison:
+12. email_id.comp.eq - Compares two email addresses (case-insensitive)
+Utility Functions:
+13. email_id.mailto_link - Creates mailto: link with optional subject/body
+14. email_id.extract.email - Extracts email address from text string
+
+
+Enum
+=============================================
+Core Service:
+
+enum.define - Defines an enumeration with key-value pairs, creating a context for the enum
+
+Context Services (available after enum is defined):
+2. <enum_name>.keys - Gets all valid keys from the enum
+3. <enum_name>.list - Gets complete enum definition (all key-value pairs)
+4. <enum_name>.validate - Validates if a given value is a valid enum key
+
+[enum.define ^order_status]
+  [pending _value='Order Pending' /]
+  [processing _value='Order Being Processed' /]
+  [shipped _value='Order Shipped' /]
+  [delivered _value='Order Delivered' /]
+  [cancelled _value='Order Cancelled' /]
+[/enum.define]
+
+
+taxonomy
+====================================
+[taxonomy.define ^product_categories]
+    [electronics]
+        [meta]
+            [title]Electronics[/title]
+            [desc]All electronic products[/desc]
+            [icon]devices[/icon]
+        [/meta]
+        [children]
+            [smartphones]
+                [meta]
+                    [title]Smartphones[/title]
+                    [desc]Mobile phones and accessories[/desc]
+                    [icon]smartphone[/icon]
+                [/meta]
+                [children]
+                    [android]
+                        [meta]
+                            [title]Android Phones[/title]
+                            [desc]All Android smartphones[/desc]
+                            [min_price]10000[/min_price]
+                        [/meta]
+                    [/android]
+                    [ios]
+                        [meta]
+                            [title]iPhones[/title]
+                            [desc]All Apple iPhones[/desc]
+                            [min_price]50000[/min_price]
+                        [/meta]
+                    [/ios]
+                    [symphony]
+                    [/symphony]
+                [/children]
+            [/smartphones]
+        [/children]
+    [/electronics]
+[/taxonomy.define]
+
+
+Core Service:
+
+taxonomy.define - Creates a new hierarchical taxonomy with terms and metadata
+
+Context Services (available after taxonomy is defined):
+2. <taxonomy_name>.list - Returns complete taxonomy definition
+3. <taxonomy_name>.get_terms - Gets child terms under specified path
+4. <taxonomy_name>.get_term - Gets specific term with its metadata and children
+5. <taxonomy_name>.get_meta - Gets metadata for a specific term
+6. <taxonomy_name>.exists - Checks if a term exists in taxonomy
+7. <taxonomy_name>.add_terms - Adds multiple terms to specified location
+
+
+Object
+===========================================
+Core Services:
+
+obj.create - Creates an object from array-builder content/structure
+obj.set - Sets values in an object as properties
+obj.empty - Creates an empty standard object (stdClass)
+
+Type Checking:
+4. obj.is.obj - Checks if a value is an object
+5. obj.is.not_obj - Checks if a value is not an object
+Search Functions:
+6. obj.search_deep - Searches for value in nested object structure (recursive)
+
+
+Regex
+============================================
+Core Services:
+
+regex.match - Tests if pattern matches text (returns boolean status)
+regex.extract - Extracts all pattern matches from text
+regex.replace - Replaces pattern matches with replacement text
+regex.split - Splits text using pattern as delimiter
+regex.count - Counts number of pattern matches in text
+
+[regex.count o.set=word_count]
+  [pattern]\b\w+\b[/pattern]
+  [text]The quick brown fox jumps over the lazy dog[/text]
+[/regex.count]
+
+
+Common Features Across All Services:
+
+Required Parameters:
+
+pattern: Regex pattern
+text: Input text to process
+
+
+Optional Parameter:
+
+flags: Regex modifiers (i,m,s,x,A,D,S,U,X,J,u)
+
+
+
+
+Debug2
+=============================================================================
+debug2.alert - Shows value in browser alert popup
+debug2.popup - Displays content in styled popup window
+debug2.div - Creates fixed-position div with debug output
+debug2.console - Logs to browser console
+
+Value Inspection Services:
+5. debug2.dump - Dumps variable content with formatting
+6. debug2.echo - Echoes value directly
+7. debug2.echo_die - Dumps value and stops execution
+8. debug2.die - Stops execution
+Exception Handling:
+9. debug2.trap_exception - Catches and formats exceptions/errors
+10. debug2.ignore - Ignores contained content (useful for testing)
+Input Debugging:
+11. debug2.input.request - Dumps $_REQUEST data
+12. debug2.input.cookie - Dumps $_COOKIE data
+13. debug2.input.get - Dumps $_GET data
+14. debug2.input.post - Dumps $_POST data
+Comprehensive Debug:
+15. debug2.info - Combined debugging information service
+
+
+
+
+

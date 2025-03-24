@@ -1,0 +1,40 @@
+I want to iterate with you to create a common structure for creating various html blocks like FAQs, Cards, Stacked Lists, Accordian etc
+
+I want to be able to create a mix and match structure
+
+a) Be able to get data from various sources
+b) Be able to use various formats or layouts. eg for a accordian have multiple ways of displaying accordians
+
+
+
+1) Direct FAQ Entry
+
+awesomeCopy[env.set_array faqs]
+    [@new]
+        [question]What is your return policy?[/question]
+        [answer]30 days return with receipt[/answer]
+    [/@new]
+    [@new]
+        [question]Do you ship internationally?[/question]
+        [answer]Yes, we ship worldwide[/answer]
+    [/@new]
+[/env.set_array]
+
+MySQL FAQ Table Query
+
+awesomeCopy[mysqli.fetch.rows]
+    SELECT question, answer FROM faq_table WHERE category = 'shipping'
+[/mysqli.fetch.rows]
+
+WordPress FAQ Posts/CPT
+
+awesomeCopy[mysqli.fetch.rows]
+    SELECT post_title as question, post_content as answer 
+    FROM wp_posts 
+    WHERE post_type = 'faq'
+    AND post_status = 'publish'
+[/mysqli.fetch.rows]
+
+FAQ API Response
+
+awesomeCopy[curl.api.get url="https://api.example.com/faqs" out:@env.set=api_faqs /] 

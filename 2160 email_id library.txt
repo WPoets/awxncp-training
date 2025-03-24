@@ -1,0 +1,135 @@
+# Email ID Library Training Guide
+
+## Overview
+The email_id library provides comprehensive functionality for handling email addresses in AwesomeEnterprise. It includes validation, formatting, parsing, and various email-related checks.
+
+## Core Concepts
+
+### 1. Email Address Handling
+- All email addresses are normalized to lowercase
+- Whitespace is automatically trimmed
+- Invalid email formats throw exceptions
+- Display names can be included ("John Doe <john@example.com>")
+
+### 2. Validation
+All email validation uses a two-step process:
+1. Format validation using PHP's filter_var
+2. Additional checks for specific requirements (role accounts, disposable domains, etc.)
+
+### 3. Common Patterns
+
+#### Basic Email Creation and Validation
+```awesome
+[email_id.create "user@example.com" /]
+```
+
+#### Environment Variable Usage
+```awesome
+[email_id.get "module.user.email" /]
+```
+
+#### Email With Display Name
+```awesome
+[email_id.create main="user@example.com" display_name="John Doe" /]
+```
+
+## Best Practices
+
+### 1. Always Validate User Input
+```awesome
+[email_id.is.valid main={request2.email} o.set="module.is_valid" /]
+[cond.block.@check cond.@=bool.is.true cond.main={module.is_valid}]
+    [@check.then]
+        [email_id.create main={request2.email} o.set="module.validated_email" /]
+    [/@check.then]
+[/cond.block.@check]
+```
+
+### 2. Use Normalization for Storage
+```awesome
+[email_id.normalize main={request2.email} o.set="module.normalized_email" /]
+```
+
+### 3. Mask Emails for Display
+```awesome
+[email_id.mask main={user.email} o.set="module.masked_email" /]
+```
+
+### 4. Compare Emails Safely
+```awesome
+[email_id.comp.eq main={email1} with={email2} o.set="module.emails_match" /]
+```
+
+## Common Workflows
+
+### 1. Complete User Registration Flow
+```awesome
+[do.@registration]
+    // Validate email format
+    [email_id.is.valid main={request2.email} o.set="@registration.valid" /]
+    
+    [cond.block.@check cond.@=bool.is.true cond.main={@registration.valid}]
+        [@check.then]
+            // Check for disposable email
+            [email_id.is.disposable main={request2.email} o.set="@registration.is_disposable" /]
+            
+            [cond.block.@disposable cond.@=bool.is.false cond.main={@registration.is_disposable}]
+                [@disposable.then]
+                    // Check MX record
+                    [email_id.has_mx main={request2.email} o.set="@registration.has_mx" /]
+                    
+                    [cond.block.@mx cond.@=bool.is.true cond.main={@registration.has_mx}]
+                        [@mx.then]
+                            // Normalize and store
+                            [email_id.normalize main={request2.email} o.set="@registration.final_email" /]
+                        [/@mx.then]
+                    [/cond.block.@mx]
+                [/@disposable.then]
+            [/cond.block.@disposable]
+        [/@check.then]
+    [/cond.block.@check]
+[/do.@registration]
+```
+
+### 2. Email Display Name Handling
+```awesome
+[do.@email_format]
+    // Create email with display name
+    [email_id.create 
+        main={user.email} 
+        display_name={user.name}
+        o.set="@email_format.formatted"
+    /]
+    
+    // Extract parts back
+    [email_id.decompose 
+        main={@email_format.formatted}
+        o.set="@email_format.parts"
+    /]
+[/do.@email_format]
+```
+
+## Error Handling
+
+### Common Exceptions
+1. Invalid email format
+2. Non-string input
+3. Missing required attributes
+4. Invalid array structure for email_id.get
+
+### Proper Error Handling Example
+```awesome
+[do.@validate]
+    [cond.block.@try]
+        [@try.then]
+            [email_id.create main={user_input} o.set="@validate.email" /]
+        [/@try.then]
+        [@try.else]
+            [str.create "Invalid email format" o.set="@validate.error" /]
+        [/@try.else]
+    [/cond.block.@try]
+[/do.@validate]
+```
+
+
+content:<env path>

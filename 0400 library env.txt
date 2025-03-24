@@ -1,0 +1,230 @@
+# Environment Library Guide
+
+The `env` library provides functionality to work with AwesomeEnterprise's environment variables. The environment is a multidimensional associative array that stores values that can be accessed using paths.
+
+## Basic Operations
+
+### env.get
+Retrieves a value from the environment using a path.
+
+```awesome
+// Basic usage
+[env.get some.path /]
+
+// Directly access an env path (alternative)
+[env.some.path /]
+
+// Example
+[env.set user.name="John Doe" /]
+[env.get user.name /]  // Returns: John Doe
+```
+
+### env.set
+Sets one or more values in the environment. Return nothing.
+Have a look at all the services in the env library. Do not create any variables in the env with those names
+
+
+```awesome
+// Set single value
+[env.set x=1 /]
+
+// Set multiple values
+[env.set x=1 y=2 z=3 /]
+
+// Set nested paths
+[env.set person.name="John" person.age="int:25" person.active="bool:true" /]
+
+// Set values with spaces using quotes
+[env.set person.name='John Doe' person.city="New York" /]
+
+// Set deeply nested paths
+[env.set person.address.zipcode="411045" person.address.city="pune" /]
+```
+
+### env.dump
+Dumps environment variables for debugging.
+
+```awesome
+// Dump entire environment
+[env.dump /]
+
+// Dump specific path
+[env.dump person /]
+```
+
+### env.echo
+Echoes environment variables.
+
+```awesome
+// Echo entire environment
+[env.echo /]
+
+// Echo specific path
+[env.echo person /]
+```
+
+## Working with Arrays
+
+### env.set_array
+Creates associative arrays in the environment. It is similar to [arr.create] but targets an env variable explicitly.
+
+#### 1. Using Key-Value Pairs
+```awesome
+[env.set_array person 
+    name='John Doe'
+    age="int:30"
+    email='john@example.com'
+    is_active="bool:true"
+    salary="num:50000.50"
+/]
+```
+
+#### 2. Using Nested Paths
+```awesome
+[env.set_array cities 
+    newyork.name='New York'
+    newyork.country='USA'
+    delhi.name='Delhi'
+    delhi.country='India'
+/]
+```
+
+#### 3. Using Array Builder Syntax
+```awesome
+[env.set_array products]
+    [laptop]
+        [name]MacBook Pro[/name]
+        [price]num:1299.99[/price]
+        [in_stock]bool:true[/in_stock]
+    [/laptop]
+    [phone]
+        [name]iPhone 13[/name]
+        [price]num:999.99[/price]
+        [in_stock]bool:false[/in_stock]
+    [/phone]
+[/env.set_array]
+```
+
+#### 4. Creating Indexed Arrays
+```awesome
+[env.set_array cities]
+    [@new pop="int:9000" name="nagpur" /]
+    [@new pop="int:9000" name="nashik" /]
+    [@new _value="goa" /]
+[/env.set_array]
+```
+
+
+### env.set_raw
+Sets unparsed content to a path in the environment. The content will not be parsed when being set.
+
+```awesome
+// Basic usage
+[env.set_raw somepath]
+    some content with shortcodes
+[/env.set_raw]
+
+// Example storing code to parse later
+[env.set_raw template.email.body]
+    Dear [env.get user.name /],
+    Your order #[env.get order.id /] has been processed.
+    Thank you for your business!
+[/env.set_raw]
+
+// Example storing shortcode that will remain unparsed
+[env.set_raw rawcode]
+    [env.get some.value /]
+[/env.set_raw]
+```
+
+To later parse the stored raw content, you can use code.run or other parsing services:
+```awesome
+[code.run template.email.body /]
+```
+
+
+
+
+### Using Curly Braces for References
+```awesome
+[env.set user.name="John" /]
+[env.set user.age="int:30" /]
+
+// Reference existing values
+[env.set user_copy.name={user.name} user_copy.age={user.age} /]
+```
+
+## Best Practices
+
+### 1. Type Casting
+Always use appropriate type casting for non-string values:
+```awesome
+[env.set_array person]
+    [name]John Doe[/name]             // String (default)
+    [age _value="int:30" /]           // Integer
+    [salary _value="num:50000.50" /]  // Float/Number
+    [active _value="bool:true" /]     // Boolean
+    [tags _value="comma:dev,admin" /] // Array from comma-separated string
+[/env.set_array]
+```
+
+### 2. Organizing Complex Data
+Structure complex data hierarchically:
+```awesome
+[env.set_array organization]
+    [company]
+        [name]Tech Corp[/name]
+        [employees]
+            [@new]
+                [name]John Doe[/name]
+                [department]Engineering[/department]
+            [/@new]
+            [@new]
+                [name]Jane Smith[/name]
+                [department]Marketing[/department]
+            [/@new]
+        [/employees]
+    [/company]
+[/env.set_array]
+```
+
+## Important Notes
+
+1. Keys cannot contain spaces or special characters (except dots for paths)
+2. Values are strings by default unless type cast
+3. Arrays can be both associative and indexed
+4. Raw content is stored unparsed until explicitly processed later
+5. Environment variables are accessible throughout your application
+6. Use descriptive paths for better code organization
+7. Always handle large data structures appropriately
+
+## Common Patterns
+
+### Configuration Storage
+```awesome
+[env.set_array config]
+    [database]
+        [host]localhost[/host]
+        [port _value="int:3306" /]
+        [username]db_user[/username]
+    [/database]
+    [api]
+        [base_url]https://api.example.com[/base_url]
+        [timeout _value="int:30" /]
+    [/api]
+[/env.set_array]
+```
+
+### User Data Management
+```awesome
+[env.set_array user]
+    [profile]
+        [name]John Doe[/name]
+        [email]john@example.com[/email]
+        [preferences]
+            [theme]dark[/theme]
+            [notifications _value="bool:true" /]
+        [/preferences]
+    [/profile]
+[/env.set_array]
+```

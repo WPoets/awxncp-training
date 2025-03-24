@@ -1,0 +1,102 @@
+This is the 'date' library and is used to work with dates
+
+
+date.get
+----------------------
+Gets the Value from a Env Path. Converts it into a DateTime Object.
+If the DateTime value is null and there is a default value then the default value is returned.
+
+Returns value as a Float
+[date.get <env path> default=<default_value> /]
+Parameters:
+
+
+main/unnamed: An environment Path to get
+default: Default value if the main value is null
+
+The main and defaultValue should be such that they can be converted into a DateTime object in PHP
+$return_value=new \DateTime($value);
+
+
+Example:
+
+[date.get main='some.path' default='some value' /]
+
+
+date.create
+-----------------------
+Create & return value as a date
+[date.create "DateTime Compatible Value" /]
+Parameters:
+
+main/unnamed: The value to create as a datetime object. The value should be acceptable to DateTime Object in PHP
+
+Example:
+[date.create "20240101" /]
+
+
+
+date.modify
+-------------------------------
+[date.modify date='' frequency='' /]
+
+Parameters:
+date: The date to modify (string or DateTime object)
+frequency: The modification to apply (e.g., '+1 day', '+2 months', '-36 minutes')
+Basically any modification 	which will be valid in the syntax below
+
+if(!is_a($date, 'DateTime')) {
+  $date = new \DateTime($date);
+}
+$date->modify($frequency);
+
+
+sample:
+[date.modify date='20240101' frequency='+1 days' /]
+
+
+date.format
+--------------------------------------
+Format a DateTime object using a format string. Returns the formatted date string.
+[date.format date='' format='' /]
+Parameters:
+main: DateTime string or object to format (required)
+format: The format string as defined in PHP's date() function (required)
+Example:
+[date.format main='20240101' format='Y' /] will return '2024'
+[date.format main='2024-01-01 14:30:00' format='Y-m-d H:i:s' /] will return '2024-01-01 14:30:00'
+Note that this will throw exceptions if:
+
+main parameter is missing
+format parameter is missing
+main contains an invalid date that cannot be converted to DateTime
+format contains an invalid format string
+
+Sample formats:
+Y: 4-digit year (e.g., 2024)
+y: 2-digit year (e.g., 24)
+m: Month with leading zeros (01-12)
+d: Day with leading zeros (01-31)
+H: 24-hour format (00-23)
+i: Minutes with leading zeros (00-59)
+s: Seconds with leading zeros (00-59)
+Example with existing DateTime object:
+[date.create '20240101' out:@env.set=mydate /]
+[date.format main={mydate} format='Y-m-d' /]
+
+
+date.diff
+-------------------------
+Returns the difference between two dates
+[date.diff date_from=<date1> date_to=<date2> type=<diff_type> /]
+
+Parameters:
+date_from: Start date (string or DateTime object)
+date_to: End date (string or DateTime object)
+type: Type of difference to calculate ('mins', 'hours', 'days', 'years', or 'english')
+English is as a English sentence
+
+
+Example:
+[date.diff date_from='2023-01-01' date_to='2023-12-31' type='days' /]
+

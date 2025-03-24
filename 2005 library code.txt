@@ -1,0 +1,40 @@
+This is the `code` library and helps you run, dump and highlight code blocks
+
+
+code.run
+------------------
+Run a block of code saved in an environment variable
+[code.run 'path to unparsed_code' /]
+
+example 1::
+[content.get o.set=unparsed_code]
+	[str.create hello /]
+[/content.get]
+[code.run unparsed_code /]
+
+
+code.dump
+--------------------
+Replies with the raw code with code tags.
+
+dumps the code inside the shortcode without parsing it.
+it puts it in the html tags <code></code>
+
+
+[code.dump]
+	[env.get x /]
+[/code.dump]
+
+will return
+
+<code>[env.get x /]</code>
+
+
+code.highlight
+--------------------
+Replies with the raw code with code tags. Syntax is highlighted for easy understanding
+
+[code.highlight]
+	[env.get x /]
+[/code.highlight] 
+ 

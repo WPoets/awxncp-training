@@ -1,0 +1,87 @@
+This document outlines the library 'templates'
+
+Within a module you have access to a service called templates.
+This service is not accessible outside a module so calling it outside a module gives an error
+
+What is a template and purpose of a template is defined in a separate document.
+
+
+templates.add
+-----------------------
+To add templates to the active module.
+
+[templates.add template1]
+	I am template 1
+[/templates.add]
+
+[templates.add template2]
+	I am template 2
+	[env.set x='template1' /]
+	[env.x /]
+[/templates.add]
+
+
+Template names can also have dots to allow to group templates
+
+[templates.add db.template1]
+	I am template 1
+[/templates.add]
+[templates.add db.template2]
+	I am template 1
+[/templates.add]
+
+
+templates.run
+---------------------------------------
+Templates defined within the module can be run from within the module using
+
+[templates.run template1 /] will run template1 
+[templates.run template2 /] will run template2 
+[templates.run db.template2 /] will run db.template2 
+
+Internally templates.run calls the template.run service so the behavior is exactly the same
+
+ 
+
+templates.<templatename>
+---------------------------------------
+You can also run a template by directly giving the template name
+So 
+
+[templates.run template1 /] is same as [templates.template1 /]
+
+
+
+Example of a module with templates and running the templates
+------------------------------------------------------------
+ 
+[templates.add template1]
+	I am template 1
+	Any args passed to me i will get in 'template'
+	
+	[template.param1 /] will echo the value of param1 
+	[template.param2 /] will echo the value of param2 
+	
+	
+[/templates.add]
+
+[templates.add template2]
+	I am template 2
+	Below i call template 1
+	[templates.template1 /]
+	
+	i can also call template 1 by using templates.run
+	[templates.run template1 /]
+
+	i can also pass args to template 1
+	[templates.template1  param1=value1 param2=value2/]
+	[templates.run template1 param1=value1 param2=value2 /]
+
+	
+[/templates.add]
+
+
+
+
+
+ 

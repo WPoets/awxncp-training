@@ -1,0 +1,353 @@
+# Array Items (arr_items) Library Documentation
+
+## Overview
+The arr_items library provides specialized operations for manipulating array elements. This includes inserting, removing, replacing, and retrieving array items at specific positions or by keys. All operations are immutable - they return a new array with the changes applied rather than modifying the original array.
+
+## Important: Immutability
+All arr_items operations are immutable. They do not modify the original array but instead return a new array with the changes applied. You must capture the returned array to preserve the changes.
+
+```awesome
+// Wrong - Changes are lost
+[arr_items.remove.first main={my_array} /]
+
+// Correct - Changes are captured
+[arr_items.remove.first 
+    main={my_array} 
+    out:@env.set=updated_array
+/]
+```
+
+## Core Services
+
+### 1. arr_items.reverse
+Reverses array order while preserving keys
+
+```awesome
+[arr_items.reverse 
+    main={array}
+    out:@env.set=reversed_array 
+/]
+```
+
+### 2. arr_items.insert
+Insert items at specified position. Supports multiple insertion points.
+
+```awesome
+// Insert at beginning
+[arr_items.insert.beginning 
+    target={target_array}
+    out:@env.set=updated_array
+]
+    [@new]First Item[/@new]
+[/arr_items.insert.beginning]
+
+// Insert before position
+[arr_items.insert.before_pos 
+    target={target_array} 
+    pos=3
+    out:@env.set=updated_array
+]
+    [@new]Insert Before Position 3[/@new]
+[/arr_items.insert.before_pos]
+```
+
+Available Positions:
+- `beginning` - Start of array
+- `before_pos` - Before numeric position (requires pos attribute)
+- `before_key` - Before specific key (requires key attribute)
+- `after_pos` - After numeric position (requires pos attribute)
+- `after_key` - After specific key (requires key attribute)
+- `end` - End of array
+
+### 3. arr_items.remove
+Remove elements from specified positions
+
+```awesome
+// Remove first item
+[arr_items.remove.first 
+    main={array}
+    out:@env.set=updated_array 
+/]
+
+// Remove specific key
+[arr_items.remove.key 
+    main={array} 
+    key="user1"
+    out:@env.set=updated_array 
+/]
+
+// Remove multiple keys
+[arr_items.remove.keys 
+    main={array} 
+    keys="key1,key2,key3"
+    out:@env.set=updated_array 
+/]
+```
+
+Available Operations:
+- `first` - Remove first item
+- `last` - Remove last item
+- `key` - Remove by specific key
+- `keys` - Remove multiple keys
+- `slice` - Remove a section of array
+
+### 4. arr_items.replace
+Replace elements at specified positions
+
+```awesome
+// Replace first item
+[arr_items.replace.first 
+    target={target_array}
+    out:@env.set=updated_array
+]
+    [@new]New First Item[/@new]
+[/arr_items.replace.first]
+
+// Replace by key
+[arr_items.replace.key 
+    target={target_array} 
+    key="user1"
+    out:@env.set=updated_array
+]
+    [@new]Updated User[/@new]
+[/arr_items.replace.key]
+```
+
+Available Operations:
+- `first` - Replace first item
+- `last` - Replace last item
+- `key` - Replace by specific key
+- `slice` - Replace a section of array
+
+### 5. arr_items.get
+Retrieve elements from specified positions
+
+```awesome
+// Get first item
+[arr_items.get.first 
+    main={array}
+    out:@env.set=first_item 
+/]
+
+// Get by key
+[arr_items.get.key 
+    main={array} 
+    key="user1"
+    out:@env.set=user 
+/]
+
+// Get multiple keys
+[arr_items.get.keys 
+    main={array} 
+    keys="id,name,email"
+    out:@env.set=user_data 
+/]
+```
+
+Available Operations:
+- `first` - Get first item
+- `last` - Get last item
+- `key` - Get by specific key
+- `keys` - Get multiple keys
+- `slice` - Get a section of array
+
+### 6. arr_items.keys and arr_items.values
+Extract keys or values from array
+
+```awesome
+[arr_items.keys 
+    main={array}
+    out:@env.set=all_keys 
+/]
+
+[arr_items.values 
+    main={array}
+    out:@env.set=all_values 
+/]
+```
+
+### 7. arr_items.find
+Find items in array by value
+
+```awesome
+// Find all matching items
+[arr_items.find.all 
+    main={array} 
+    value="search_value"
+    out:@env.set=matches 
+/]
+
+// Find first match
+[arr_items.find.first 
+    main={array} 
+    value="search_value"
+    out:@env.set=first_match 
+/]
+```
+
+## Slice Operations
+
+Slice functionality supports various ways to specify ranges:
+
+### 1. Using Position and Length
+```awesome
+[arr_items.get.slice 
+    main={array}
+    from_pos=2      // Start from position 2
+    length=3        // Get 3 items
+    out:@env.set=slice_result
+/]
+```
+
+### 2. Using Start to End Position
+```awesome
+[arr_items.get.slice 
+    main={array}
+    from_pos=2      // Start from position 2
+    to_pos=5        // End at position 5
+    out:@env.set=slice_result
+/]
+```
+
+### 3. Using Keys
+```awesome
+[arr_items.get.slice 
+    main={array}
+    from_key="start_key"    // Start from this key
+    to_key="end_key"        // End at this key
+    out:@env.set=slice_result
+/]
+
+
+From attributes for slice::
+from_beginning=yes 
+from_key=<key>
+from_pos=<pos>  numeric position(1 based) eg:2 
+
+length = number of items
+to_end=yes
+to_key=<key>
+to_pos= numeric position(1 based) eg:2 
+
+
+```
+
+## Common Patterns
+
+### 1. Chaining Operations
+```awesome
+// Remove first, add new, remove last
+[arr_items.remove.first 
+    main={source_array} 
+    out:@env.set=step1
+/]
+
+[arr_items.insert.beginning 
+    target={step1}
+    out:@env.set=step2
+]
+    [@new]New First Item[/@new]
+[/arr_items.insert.beginning]
+
+[arr_items.remove.last 
+    main={step2}
+    out:@env.set=final_result 
+/]
+```
+
+### 2. Data Extraction
+```awesome
+// Get specific fields and update
+[arr_items.get.keys 
+    main={user_data} 
+    keys="id,name,email" 
+    out:@env.set=user_fields
+/]
+
+[arr_items.replace.key 
+    target={user_fields}
+    key="email"
+    out:@env.set=updated_fields
+]
+    [@new]new@email.com[/@new]
+[/arr_items.replace.key]
+```
+
+## Error Handling
+
+### 1. Invalid Array
+```awesome
+// Will throw error - main not array
+[arr_items.reverse main="not an array" /]
+```
+
+### 2. Invalid Position
+```awesome
+// Will throw error - position out of bounds
+[arr_items.get.slice 
+    main={array}
+    from_pos=100
+    length=1
+/]
+```
+
+### 3. Missing Key
+```awesome
+// Will throw error - key doesn't exist
+[arr_items.get.key 
+    main={array}
+    key="non_existent"
+/]
+```
+
+## Best Practices
+
+1. Always Capture Results
+```awesome
+[arr_items.remove.first 
+    main={array}
+    out:@env.set=updated_array 
+/]
+```
+
+2. Use Clear Intermediate Variables
+```awesome
+[arr_items.remove.first 
+    main={array}
+    out:@env.set=without_first 
+/]
+
+[arr_items.remove.last 
+    main={without_first}
+    out:@env.set=final_array 
+/]
+```
+
+3. Update Source Arrays When Needed
+```awesome
+[arr_items.reverse 
+    main={my_array}
+    out:@env.set=my_array  // Overwrites original
+/]
+```
+
+## Important Notes
+
+1. Immutability
+   - All operations return new arrays
+   - Original arrays remain unchanged
+   - Always capture return values
+
+2. Position vs Index
+   - Positions start from 1 (user-friendly)
+   - Array indexes start from 0 (internal)
+   - Position 1 refers to index 0
+
+3. Key Preservation
+   - Operations preserve array keys unless specified
+   - Use with caution when key order is important
+
+4. Performance
+   - Consider memory usage with large arrays
+   - Chain operations judiciously
+   - Use appropriate operations for large datasets

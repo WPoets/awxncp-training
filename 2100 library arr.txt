@@ -1,0 +1,391 @@
+# Array Library Documentation
+
+## Overview
+The Array Library provides comprehensive functionality for working with arrays in AwesomeEnterprise. It includes services for array creation, manipulation, checking, and conversion.
+
+## Core Array Services
+
+### Basic Array Operations
+
+1. `arr.create` - Build an array from content (For details on how to build arrays see 0500 building arrays.txt )
+```awesome
+[arr.create]
+    [item1 value="one" /]
+    [item2 value="two" /]
+[/arr.create]
+```
+
+2. `arr.empty` - Create an empty array. Replies with an empty array
+```awesome
+[arr.empty out:@env.set=my_array /]
+```
+
+3. `arr.set` - Set values in array
+```awesome
+[arr.set main="env.path" key1="value1" key2="value2" /]
+
+
+attributes::
+
+unnamed/main
+The env path to setup the array in
+
+all other attributes are key=value pairs
+The keys cannot have spaces so you have to choose keys which do not have spaces
+
+[arr.set 'env path' key1='value1' key2='value2' /]
+
+
+example 1::
+[arr.set person name='vikas' age=25 sex=male/]
+
+the above would create the following
+
+env
+	[person]
+		[name]='vikas'
+		[age]='25'
+		[sex]='male'
+
+creating more complex arrays
+
+example2::
+[arr.set person.address line1='this is line 1' line2='this is line 2' /]
+
+env
+	[
+		"address" =>  
+			[
+				"line1" =>  "this is line 1"
+				"line2" => "this is line 2"
+			]
+	]
+
+
+
+example3:
+
+[arr.set cities 
+    newyork.name='New York'
+    newyork.country='USA'
+	
+    delhi.name='Delhi'
+    delhi.country='India'
+/]
+
+
+will create an associative array
+
+env
+	[
+		"newyork" =>   
+			[
+				"name"    => "New York"
+				"country" => "USA"
+			]
+		"delhi"   =>  
+			[
+				"name"    =>  "Delhi"
+				"country" =>  "India"
+			]
+	]
+
+
+example4::
+
+[arr.set person.address line1='this is line 1' line2='this is line 2' /]
+[arr.set person.address	line3='this is line 3' line4='this is line 4' /]
+
+will create 
+
+env
+[
+    "address" => 
+        [
+            "line1" =>  "this is line 1"
+            "line2" =>  "this is line 2"
+            "line3" =>  "this is line 3"
+            "line4" =>  "this is line 4"
+        ]
+]
+
+```
+
+4. `arr.get` - Get array from environment
+```awesome
+[arr.get main="env.path" /]
+```
+
+5. `arr.length` - Get array length
+```awesome
+[arr.length main={my_array} /]
+```
+
+6. `arr.search_deep` - Search in nested arrays
+```awesome
+[arr.search_deep 
+    main={nested_array} 
+    search="value"
+    field="field_name"
+/]
+```
+
+## Array Type Checking (arr.is)
+Returns true or false
+
+### Basic Type Checks
+
+1. `arr.is.arr` - Check if value is array
+```awesome
+[arr.is.arr main={value} /]
+```
+
+2. `arr.is.not_arr` - Check if value is not array
+```awesome
+[arr.is.not_arr main={value} /]
+```
+
+### Array State Checks
+
+3. `arr.is.empty` - Check if array is empty
+```awesome
+[arr.is.empty main={array} /]
+```
+
+4. `arr.is.not_empty` - Check if array is not empty
+```awesome
+[arr.is.not_empty main={array} /]
+```
+
+### Array Type Checks
+
+5. `arr.is.associative` - Check if array is associative
+```awesome
+[arr.is.associative main={array} /]
+```
+
+6. `arr.is.sequential` - Check if array is sequential
+```awesome
+[arr.is.sequential main={array} /]
+```
+
+## Array Content Checks (arr.has)
+Returns true or false
+
+### Key Checks
+
+1. `arr.has.key` - Check for specific key
+```awesome
+[arr.has.key main={array} key="search_key" /]
+```
+
+2. `arr.has.keys` - Check for multiple keys
+```awesome
+[arr.has.keys main={array} keys="key1,key2,key3" /]
+```
+
+### Value Checks
+
+3. `arr.has.value` - Check for specific value
+```awesome
+[arr.has.value main={array} value="search_value" /]
+```
+
+4. `arr.has.values` - Check for multiple values
+```awesome
+[arr.has.values main={array} values="val1,val2,val3" /]
+```
+
+### Special Value Checks
+
+5. `arr.has.empty` - Check for empty values
+```awesome
+[arr.has.empty main={array} /]
+```
+
+6. `arr.has.null` - Check for null values
+```awesome
+[arr.has.null main={array} /]
+```
+
+## Array Joining (arr.join)
+Returns a string joined with the separator
+
+### Basic Join Operations
+
+1. `arr.join.comma` - Join with commas
+```awesome
+[arr.join.comma main={array} /]
+```
+
+2. `arr.join.dot` - Join with dots
+```awesome
+[arr.join.dot main={array} /]
+```
+
+3. `arr.join.space` - Join with spaces
+```awesome
+[arr.join.space main={array} /]
+```
+
+4. `arr.join.separator` - Join with custom separator
+```awesome
+[arr.join.separator main={array} separator="|" /]
+```
+
+## Array Conversion (arr.to)
+
+### Format Conversions
+
+1. `arr.to.json` - Convert to JSON
+```awesome
+[arr.to.json main={array} pretty="yes" /]
+```
+
+2. `arr.to.csv` - Convert to CSV
+```awesome
+[arr.to.csv 
+    main={array} 
+    headers="col1,col2,col3" 
+/]
+```
+
+3. `arr.to.query_string` - Convert to URL query string
+```awesome
+[arr.to.query_string 
+    main={array} 
+    encoding="php" 
+/]
+```
+
+## Common Patterns
+
+### 1. Building and Checking Arrays
+```awesome
+[arr.create o.set=user_data]
+    [name]John Doe[/name]
+    [age]30[/age]
+    [email]john@example.com[/email]
+[/arr.create]
+
+[arr.has.keys 
+    main={user_data} 
+    keys="name,email" 
+    out:@env.set=has_required 
+/]
+```
+
+### 2. Array Type Validation
+```awesome
+[cond.block.@check]
+    [@check.then.and 
+        cond.@=arr.is.not_empty
+        cond.main={data}
+        cond.and.@=arr.is.associative
+        cond.and.main={data}
+    ]
+        Valid associative array
+    [/@check.then.and]
+[/cond.block.@check]
+```
+
+### 3. Data Export
+```awesome
+[arr.to.csv
+    main={records}
+    headers="id,name,email"
+    out:@env.set=csv_data
+/]
+```
+
+## Error Handling
+
+1. Invalid Array Input
+```awesome
+// Will throw error - main not array
+[arr.has.key 
+    main="not an array"
+    key="test"
+/]
+```
+
+2. Missing Required Parameters
+```awesome
+// Will throw error - missing key
+[arr.has.key main={array} /]
+```
+
+3. Invalid Join Parameters
+```awesome
+// Will throw error - separator must be string
+[arr.join.separator
+    main={array}
+    separator=123
+/]
+```
+
+## Best Practices
+
+1. Always Check Array Type
+```awesome
+[cond.block.@validate]
+    [@validate.then.and
+        cond.@=arr.is.arr
+        cond.main={data}
+    ]
+        Process array
+    [/@validate.then.and]
+[/cond.block.@validate]
+```
+
+2. Use Type-Safe Value Checks
+```awesome
+[arr.has.value
+    main={numbers}
+    value="int:42"
+/]
+```
+
+3. Handle Empty Arrays
+```awesome
+[cond.block.@check]
+    [@check.then.and
+        cond.@=arr.is.not_empty
+        cond.main={data}
+    ]
+        Process non-empty array
+    [/@check.then.and]
+[/cond.block.@check]
+```
+
+4. Clear Error Messages
+```awesome
+[arr.has.keys
+    main={user}
+    keys="name,email"
+    out:@env.set=validation
+/]
+```
+
+## Important Notes
+
+1. Type Handling
+   - Array services strictly check types
+   - Use appropriate type casting when needed
+   - Values are compared with strict equality (===)
+
+2. Error Handling
+   - Services throw exceptions for invalid inputs
+   - Always validate array existence before operations
+   - Use appropriate error handling for each service
+
+3. Performance Considerations
+   - Use arr.has services for efficient checking
+   - Prefer arr.join over manual string concatenation
+   - Consider data size when converting to JSON/CSV
+
+4. Structure Best Practices
+   - Use consistent array structures
+   - Prefer associative arrays for named data
+   - Use sequential arrays for lists
+   - Always validate array structure before processing

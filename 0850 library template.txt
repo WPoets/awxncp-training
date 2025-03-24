@@ -1,0 +1,294 @@
+this document covers how to work with the 'template' library.
+A template is block of independent AwesomeEnterprise Code and can be run as a unit.
+
+
+The document Covers
+
+a) How to define a template
+b) How to run a template
+c) When a template is running
+
+
+a) Define a template::
+===============================
+
+Within a module
+-------------------------
+Templates can be defined within a module using the 'templates' service. The templates library has more of this
+
+[templates.add template1]
+	I am template 1
+[/templates.add]
+
+This will add a template 'template1' to the module
+
+
+
+
+An anonymous template
+-------------------------
+You can create a block of code in any way and store it in the environment. Make sure it is not parsed instantly. You can later run it as a template. These are called anonymous templates as they are created and used on the fly and not part of a module.
+
+eg:
+
+[content.get o.set=some_template_name]
+	some AwesomeEnterprise Code
+[/content.get]
+
+
+
+
+b) Run a template
+=======================================
+Depending on the type of template you you can run it in various ways
+
+
+Within a module
+-------------------------
+If you are within a module and you want to run a template which was defined within the module you can use
+
+[templates.run template1 /] or [templates.template1 /]
+
+This is explained in detail in the 'templates' library document
+
+
+Run a template of an external module
+------------------------------------
+If you want to run the template of an external module. This is rarely used and has been deprecated
+
+[template.run <templatename> module='modulename' /]
+
+
+Run a template from a collection which is defined as a service
+-------------------------------------------------------------
+AwesomeEnterprise has powerful support for defining collections a service. 
+This allows you to run templates as services
+Normally we dont have to define collections as services as they are already done when AwesomeEnterprise is initiated
+This is very important as i will also be telling you about all the collections available.
+
+Here below a collection(db_2) is defined as a service 
+[services.add db2 service_label='DB2' post_type='db_2' desc='DB2' service=yes connection='live_connection' /]
+
+So you can now access the templates of this service as below:
+
+[collection_name.modulename.templatenamepart1.templatenamepart2 /]
+
+Eg:: 
+To access the template:: update_object_meta of module::meta of collection db2 we can simply use
+
+[db2.meta.update_object_meta /]
+
+
+Run an anonymous template
+-------------------------------------
+To run a block of code as a template where the code is stored in the environment in a variable.
+The template will be run and the reply of running the template will be returned
+
+[template.anon.run 'env path to the block of code' /]
+
+attributes::
+	main/unnamed (compulsory)=<env path> . The main/unnamed attribute takes an env path  
+	The envpath must have an unparsed code
+
+eg::
+
+
+[content.get o.set=codetemplate]
+	some AwesomeEnterprise Code
+[/content.get]
+
+[template.anon.run 'codetemplate' /]
+
+
+Common things while running a template
+-------------------------------------------
+Their are various ways of calling a template. They all follow the same pattern.
+All the additional attributes are passed to the template as args. 
+
+[templates.run template1 param1=x param2=y /]
+
+[template.anon.run 'codetemplate1'  param1=x param2=y /]
+
+[db2.meta.update_object_meta param1=x param2=y /]
+
+
+In all the above all the additional parameters are sent as args to the template.
+So the template will receive param1=x param2=y as args
+
+
+
+
+c) When a template is running
+===============================================
+Whichever way you run a template - the template behaves in the same way.
+
+When a template is running it creates a state variable in the env with the same name 'template'
+This only exists when the template is running. This is great as keeps the templates values within the local scope and does not clutter the global scope.
+The template state variable is accessed using the same service 'template'
+
+
+
+
+
+by default the template state variable has the following values
+
+[
+    "obj_type" => string(8) "template"
+    "name"     => string(9) "template name"
+    "obj_id"   => string(25) "unique id of the template"
+]
+
+when you call a template the params are added to the state variable
+
+eg:
+
+[templates.add template1]
+	[template.dump /]
+[/templates.add]
+
+
+[templates.template1 param1=x param2=y /]
+
+The above code will output::
+
+[
+    "obj_type" => string(8) "template"
+    "name"     => string(9) "template1"
+    "obj_id"   => string(25) "template:template1:SHpjYo"
+    "param1"   => string(1) "x"
+    "param2"   => string(1) "y"
+]
+
+working with the template state variable
+-----------------------------------------
+The template state variable is an item in the env. So you can do similar things as you can do with the env.
+
+[template.get param1] is same as [env.get template.param1 /]
+
+
+
+You can add values to the state variable using template.set.path  
+[template.set.path "value" path=formatted_order
+/]
+
+if you have the path in the main/unnamed atts then you can use
+[template.set.value order.is_priority value=bool:true /]
+
+
+You can set multiple values using
+[template.set.paths  
+	path.atts.order_id="ORD-12345"
+	path.atts.type="express"
+	path.atts.date="2025-03-14"
+	path.atts.status="processing"
+	path.atts.customer_id="CUST-789"
+	path.atts.customer_email="customer@example.com"
+	path.atts.customer_phone="555-123-4567"
+/]
+
+
+You can parse the content and set the value of the reply 
+[template.set.content order.customer_info]
+	[str.create "Customer ID: {template.atts.customer_id}" /]
+	[str.create "Contact: {template.atts.customer_email} " pipe:@=str.prepend pipe:target="template.atts.customer_phone" /]
+	[str.create "{template.atts.notvalid}" /]
+	hello
+[/template.set.content]
+		
+		
+You can set the value of the raw content using 
+
+[template.set.raw param4]
+	This content will not be parsed
+[/template.set.raw]
+
+
+Dump a value inplace
+
+[template.dump /]
+is same as 
+[env.dump /]
+
+
+[template.dump param1 /]
+is same as 
+[env.dump template.param1 /]
+
+Echo a Value
+[template.echo /]
+is same as 
+[env.echo /]
+
+[template.echo param1 /]
+is same as 
+[env.echo template.param1 /]
+
+
+template.return
+-----------------------
+Normally the template will collect the reply of the code and return that. However if you want to break the flow and return a particular value you can use template.return 
+
+[template.return <some env path> /]
+
+eg::
+
+without return:
+
+[templates.add template1]
+	I will return this
+[/templates.add]
+
+[templates.template1 /]
+
+will return 'I will return this'
+
+with return:
+
+[templates.add template1]
+	I will not return this
+	[template.set rval='To Output' /]
+	[template.return template.rval /]
+	[env.set x='This will not set' /]
+[/templates.add]
+
+[templates.template1 /]
+
+The above will output 'To Output'  
+ 'I will not return this' will get discarded.
+The env variable x will also not get set because the template will return before that 
+ 
+
+
+Here is the all the services in the 'template' library
+------------------------------------------------------------
+[template.run <templatename> module='modulename' /] - deprecated
+[servicename.modulename.templatename /] - to run a template where the collection is registered as a service
+[template.anon.run 'codetemplate' /] - run a code block from the environment
+
+[template.get param1] get a path from env.template
+[template.set.paths path.param3=hello] set a path in env.template
+[template.set.raw param4]
+	This content will not be parsed
+[/template.set.raw]
+sets the content as a value in env.template
+
+[template.set.paths path.person.name=5 path.person.age=6 /] 
+[template.dump <optional path>/] - dumps env.template
+[template.echo <optional path>/] - echo env.template
+
+[template.return <env path> /] - will return a value
+
+three predefined variables and should not be used
+[template.get name /]
+[template.get obj_type /]
+[template.get obj_id /]
+
+Any attempt to create variables of same names will overwrite.
+
+
+So it is best to not create any variables with the same name as the services or existing variables.
+Also when passing parameters to the template same rules apply. Dont use any service names and any pre existing variables
+
+
+
+

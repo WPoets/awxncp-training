@@ -1,0 +1,182 @@
+Here are the commands for the library 'curl'
+----------------------------------------------
+This library is used for making curl request in awesomeenterprise
+
+curl.api.get
+---------
+curl.api.get is a command that makes a GET request using curl library in PHP, it takes four attributes url, data, proxy and header.
+url is required, while data, proxy and header are optional.
+It also supports Conditions Processor, Modifiers Processor and Outputters Processor.
+
+The curl calls return an associative array with four keys:
+
+"info": Contains metadata about the curl request.
+"headers": Contains the response headers.
+"cookies": Contains any cookies set by the server.
+"result": Contains the actual response body.
+
+
+
+example:
+
+[template.set.path 'https://wpoets.com/api' path=url_two/]
+[arr.create o.set='template.data']
+  [username _value='' /]
+  [password _value='' /]
+  [force_single_access]yes[/force_single_access]
+[/arr.create]
+
+
+[arr.create o.set='template.proxy']
+        [host _value=''/]
+        [port  _value=''/]
+        [user  _value=''/]
+        [password  _value=''/]
+[/arr.create]
+
+
+[arr.create o.set='template.headers']
+    [header new]
+        [key  _value=''/]
+        [val  _value=''/]
+    [/header]
+[/arr.create]
+
+//** this is example of making a GET request to an url **//
+[curl.api.get url='{template.url_one}' o.set='template.urlone' /]
+
+//** this is example of making a GET request to an url and passing it data**//
+[curl.api.get url='{template.url_two}' data='{template.data}' o.set='template.urltwo' /]
+
+//** this is example of making a GET request to an url and passing it data,  headers and proxy**//
+[curl.api.get url='{template.url_two}' data='{template.data}' header='{template.headers}' proxy='{template.proxy}' o.set='template.urltwo' /]
+
+
+curl.api.post
+---------
+curl.api.post is a command that makes a POST request using curl library in PHP, it takes four attributes url, data, proxy and header.
+url is required, while data, proxy and header are optional.
+It also supports Conditions Processor, Modifiers Processor and Outputters Processor.
+
+The curl calls return an associative array with four keys:
+
+"info": Contains metadata about the curl request.
+"headers": Contains the response headers.
+"cookies": Contains any cookies set by the server.
+"result": Contains the actual response body.
+
+example:
+[template.set.path 'https://wpoets.com/api' path=url_two/]
+[arr.create o.set='template.data']
+  [username _value='' /]
+  [password _value='' /]
+  [force_single_access]yes[/force_single_access]
+[/arr.create]
+
+
+[arr.create o.set='template.proxy']
+        [host _value=''/]
+        [port  _value=''/]
+        [user  _value=''/]
+        [password  _value=''/]
+[/arr.create]
+
+
+[arr.create o.set='template.headers']
+    [header new]
+        [key  _value=''/]
+        [val  _value=''/]
+    [/header]
+[/arr.create]
+
+//** This is an example of making a POST request to a URL with data **//
+[curl.api.post url='{template.url}' data='{template.data}' o.set='template.response_with_data' /]
+
+
+//** this is example of making a POST request to an url and passing it data,  headers and proxy**//
+[curl.api.get url='{template.url_two}' data='{template.data}' header='{template.headers}' proxy='{template.proxy}' o.set='template.urltwo' /]
+
+
+curl.page.get
+---------
+curl.page.get is a command that makes a GET request to retrieve a web page using the curl library in PHP. It takes four attributes: url, data, proxy, and header.
+url is required, while data, proxy, and header are optional.
+It also supports Conditions Processor, Modifiers Processor and Outputters Processor.
+
+The curl calls return an associative array with four keys:
+
+"info": Contains metadata about the curl request.
+"headers": Contains the response headers.
+"cookies": Contains any cookies set by the server.
+"result": Contains the actual response body.
+
+example:
+[template.set.paths paths.page_url='https://www.example.com' /]
+[arr.create o.set='template.query_params']
+  [lang _value='en' /]
+  [category _value='news' /]
+[/arr.create]
+[arr.create o.set='template.proxy']
+  [host _value='proxy.example.com' /]
+  [port _value='8080' /]
+[/arr.create]
+[arr.create o.set='template.headers']
+  [header new]
+    [key _value='User-Agent' /]
+    [val _value='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' /]
+  [/header]
+[/arr.create]
+
+//** This is an example of making a GET request to retrieve a web page **//
+[curl.page.get url='{template.page_url}' o.set='template.page_content' /]
+
+//** This is an example of making a GET request to retrieve a web page with query parameters **//
+[curl.page.get url='{template.page_url}' data='{template.query_params}' o.set='template.page_content_with_params' /]
+
+//** This is an example of making a GET request to retrieve a web page with query parameters, headers, and proxy **//
+[curl.page.get url='{template.page_url}' data='{template.query_params}' header='{template.headers}' proxy='{template.proxy}' o.set='template.full_page_content' /]
+
+curl.api.patch
+---------
+curl.api.patch is a command that makes a PATCH request using the curl library in PHP. It takes four attributes: url, data, proxy, and header.
+url is required, while data, proxy, and header are optional.
+
+The curl calls return an associative array with four keys:
+
+"info": Contains metadata about the curl request.
+"headers": Contains the response headers.
+"cookies": Contains any cookies set by the server.
+"result": Contains the actual response body.
+
+example:
+
+[template.set.paths path.patch_url='https://api.example.com/users/123' /]
+[arr.create o.set='template.patch_data']
+  [name _value='John Doe Updated' /]
+  [email _value='johndoe_updated@example.com' /]
+[/arr.create]
+[arr.create o.set='template.proxy']
+  [host _value='proxy.example.com' /]
+  [port _value='8080' /]
+  [username _value='proxyuser' /]
+  [password _value='proxypass' /]
+[/arr.create]
+[arr.create o.set='template.headers']
+  [header new]
+    [key _value='Content-Type' /]
+    [val _value='application/json' /]
+  [/header]
+  [header new]
+    [key _value='Authorization' /]
+    [val _value='Bearer token123' /]
+  [/header]
+[/arr.create]
+
+//** This is an example of making a PATCH request to update a user **//
+[curl.api.patch url='{template.patch_url}' o.set='template.patch_response' /]
+
+//** This is an example of making a PATCH request to update a user with data **//
+[curl.api.patch url='{template.patch_url}' data='{template.patch_data}' o.set='template.patch_response_with_data' /]
+
+//** This is an example of making a PATCH request to update a user with data, headers, and proxy **//
+[curl.api.patch url='{template.patch_url}' data='{template.patch_data}' header='{template.headers}' proxy='{template.proxy}' o.set='template.full_patch_response' /]

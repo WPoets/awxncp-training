@@ -1,0 +1,226 @@
+I have a custom low code platform called AwesomeEnterprise. I will teach you the fundamentals and how to build and develop in this plaform.
+
+AwesomeEnterprise is focused on declarative templating rather than programmatic logic
+
+AwesomeEnterprise is like a templating engine.
+
+Sample Awesome Enterprise Code
+---------------------------------
+//* This is a block comment *//
+
+Below is a self closing shortcode
+[str.create hello /]
+
+Below is a shortcode with content inside it
+[content.run]
+	[str.create hello /]
+[/content.run]
+
+Below is a shortcode with service attributes
+[str.create 
+	main='Vikas Kumar'  
+/]
+
+Below is a shortcode with added processor attributes
+[str.create 
+	main='Vikas Kumar'  
+	when:@=int.is.odd when:main=int:5 
+/]
+
+This is just some text 
+
+
+Sample html table in awesome enterprise
+------------------------------------------
+[env.set_array users]
+  [@new]
+    [name]John Doe[/name]
+    [email]john@example.com[/email]
+    [role]Developer[/role]
+  [/@new]
+  [@new]
+    [name]Jane Smith[/name]
+    [email]jane@example.com[/email]
+    [role]Designer[/role]
+  [/@new]
+  [@new]
+    [name]Bob Wilson[/name]
+    [email]bob@example.com[/email]
+    [role]Manager[/role]
+  [/@new]
+[/env.set_array]
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    [arr_each.build.@row main={users}]
+      <tr>
+        <td>[math.plus_one {@row.info.index} /]</td>
+        <td>[env.@row.info.value.name /]</td>
+        <td>[env.@row.info.value.email /]</td>
+        <td>[env.@row.info.value.role /]</td>
+      </tr>
+    [/arr_each.build.@row]
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4">Total Users: [arr.length {users} /]</td>
+    </tr>
+  </tfoot>
+</table>
+
+====================================================
+AwesomeEnterprise code consists of three parts
+
+a) Comments
+-------------------------------------
+Anything between 
+ //* and *//
+is considered a comment
+
+Use the same style for single line or multipline comment
+
+//*This is a single line comment *//
+
+//*
+This is a
+multiline comment
+*//
+
+The below will be a comment and will be ignored
+  //*
+      [str.create main='Vikas Kumar'  
+		when:@=int.is.odd when:main=int:5 
+	/]
+  
+  *//
+  
+
+b) Shortcodes
+-----------------------
+b) Shortcodes
+Shortcodes can written like XML in two ways - Self closing 
+[str.create 'Vikas Kumar' /] 
+
+or with content inside like
+
+[content.run]
+	This is content
+	[str.create hello /]
+[/content.run]
+
+c) Text
+-------------------
+Anything which is not a comment or a shortcode is considered text and is output as it is.
+
+=============================================================================
+
+Execution of a piece of Code
+----------------------------------------
+When a piece of code is given to the Awesome Processor the is how the code is executed.
+Every piece of code must finally return a stream of text.
+
+step 1: 
+All the comments within the code are removed
+
+
+step 2: 
+All the first level shortcodes are identified. Each of the shortcodes are executed and replaced with the reply. 
+All the shortcodes must reply with a datatype which is textual in nature. So if it replies with a string or a number it is fine.
+If it replies with a array or an object then that will create an issue. 
+AwesomeEnterprise realises it is an issue and converts the array or object into text by doing a php print_r.
+
+Shortcodes must therefore be careful to only return textual content. Array and Objects should be trapped by Outputters(See Understanding Shortcodes) or they should be converted into text before returning the value.
+
+step 3: 
+The full code with the replaced shortcodes is returned
+
+
+Example code in AwesomeEnterprise
+-----------------------------------------
+
+This is my name: [str.create 'Vikas Kumar' /]
+This is my sex: [str.create 'Male' /]
+
+//*
+This is a comment
+*//
+
+
+
+step1: The comments will be removed
+
+step 2: The shortcodes will be processed
+
+step 3: The above code will return
+
+This is a name: Vikas Kumar
+This is my sex: Male
+
+
+
+Example 2::
+--------------------------------------------------------
+This is a Mysqli query: 
+
+[mysqli.fetch.row out:@module.set=all_rows]
+	Select  ID,post_title from wp_posts limit 1
+[/mysqli.fetch.row]
+
+Post title:[module.get all_rows.row.post_title /]
+
+step1: The comments will be removed
+
+step 2: The shortcodes will be processed
+
+step 3: The above code will return
+
+This is a Mysqli query: Post Title:<post title>
+
+----------------------------------------------------------------------------
+
+
+Example 3::
+--------------------------------------------------------
+[env.set_array products]
+  [product1]
+    [name]Smartphone X[/name]
+    [price]699.99[/price]
+    [category]Electronics[/category]
+    [description]Latest model with advanced features and long battery life.[/description]
+    [inStock]true[/inStock]
+  [/product1]
+[/env.set_array]
+
+This are the products::
+[env.get products /]
+
+	
+The above will output something like this::
+This are the products:: Array ( [product1] => Array ( [name] => Smartphone X [price] => 699.99 [category] => Electronics [description] => Latest model with advanced features and long battery life. [inStock] => true ) )
+
+This is because products is an array. If the intent was to put the products data as text then you could use env.dump
+[env.dump products /]
+
+There might be a case where you are assigning this to a variable in javascript. In that case you could convert this to JSON
+
+<script>
+var products=JSON.parse('[env.get products m.json_encode=yes]');
+</script>
+
+
+
+
+
+
+
+
+
+  

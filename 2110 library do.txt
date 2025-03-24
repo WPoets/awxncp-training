@@ -1,0 +1,75 @@
+Here are commands of the library: do
+
+
+do.<localvariable>
+------------------------
+
+command: do.<localvariable>
+
+[do.some_localvariable]
+code
+[/do.some_localvariable]
+
+The above service parses the content and replies with the parsed content.
+
+
+The localvariable can be any name. Typically convention is to start with @ , eg do.@i, do.@test
+The utility value is that variable is local. So once the content is executed the variable is dropped.
+This shortcode is valuable to isolate parts of code where you need some values which are relevant within the block.
+Performing calculations without polluting the global scope
+
+
+Action:
+An env variable equal to the localvariable is created. This variable is available within the do block.
+  
+example:
+
+[do.@setup]
+	the env variable @setup exists
+    [env.set @setup.y='i exist' /]
+    [env.get @setup.y /]	
+[/do.@setup]
+
+the env variable @setup does not exist
+[env.get @setup.y /]	will give back empty
+
+
+
+example:: 
+Basic usage for local variable scope:
+
+[do.@temp]
+    [env.set @temp.x='Hello World' /]
+    The value of x is: [env.get @temp.x /]
+[/do.@temp]
+
+// At this point, @temp.x no longer exists
+[env.get @temp.x /]
+    @temp.x is not accessible here
+
+example:: 
+Performing calculations without polluting the global scope:
+
+[do.@math]
+    [env.set @math.a=5 /]
+    [env.set @math.b=3 /]
+[/do.@math]
+
+// Variables a, b are not accessible here
+
+
+example:
+Setting up temporary data for a complex operation:
+[do.@user_setup]
+    [env.set @user_setup.name='John Doe' /]
+    [env.set @user_setup.email='john@example.com' /]
+    [env.set @user_setup.age=30 /]
+    
+	[env.set @user_setup.category='adult' /]
+    
+    User [env.get @user_setup.name /] ([env.get @user_setup.email /]) is categorized as: [env.get @user_setup.category /]
+[/do.@user_setup]
+
+// All @user_setup variables are no longer accessible
+
+

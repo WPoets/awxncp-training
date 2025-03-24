@@ -1,0 +1,310 @@
+# String Services Documentation
+
+## Overview
+AwesomeEnterprise provides extensive string manipulation capabilities through various string service libraries:
+- str.case - Case transformations
+- str.comp - String comparisons
+- str.needle - String search and manipulation
+- str.pad - String padding
+- str.slice - String extraction
+- str.split - split and convert into an array
+- str.trim - trim an array
+
+
+## String Case Services (str.case)
+
+### Available Services
+- str.case.upper - Convert to uppercase
+- str.case.lower - Convert to lowercase
+- str.case.sentence - Convert to sentence case (first letter capital)
+- str.case.title - Convert to title case (capitalize each word)
+- str.case.invert - Invert case of each character
+
+### Usage Examples
+```awesome
+[str.case.upper main="hello world" /]  // Returns: HELLO WORLD
+[str.case.lower main="HELLO WORLD" /]  // Returns: hello world
+[str.case.sentence main="hELLO wORLD" /]  // Returns: Hello world
+[str.case.title main="hello world" /]  // Returns: Hello World
+[str.case.invert main="Hello World" /]  // Returns: hELLO wORLD
+```
+
+### Using with Pipes
+```awesome
+[str.create "Hello World" 
+    pipe:@=str.case.upper
+/]
+
+[str.create "Mixed CASE text" 
+    pipe:@=str.case.lower 
+    pipe.1:@=str.case.title
+/]
+```
+
+## String Comparison Services (str.comp)
+
+### Available Services
+- str.comp.eq - Equal comparison
+- str.comp.neq - Not equal comparison
+- str.comp.lt - Less than
+- str.comp.gt - Greater than
+- str.comp.lte - Less than or equal
+- str.comp.gte - Greater than or equal
+
+### Usage Examples
+```awesome
+[str.comp.eq main="hello" with="hello" /]  // Returns: bool:true
+[str.comp.neq main="hello" with="world" /]  // Returns: bool:true
+[str.comp.lt main="apple" with="banana" /]  // Returns: bool:true
+```
+
+### In Conditional Blocks
+```awesome
+[cond.block.@check cond.@=str.comp.eq cond.main="hello" cond.with="hello"]
+    [@check.then]
+        Strings match!
+    [/@check.then]
+    [@check.else]
+        Strings don't match!
+    [/@check.else]
+[/cond.block.@check]
+```
+
+## String Search Services (str.needle)
+
+### Available Services
+- str.needle.count - Count occurrences
+- str.needle.pos_first - Find first position
+- str.needle.pos_last - Find last position
+- str.needle.pos_n - Find nth position
+- str.needle.replace - Replace occurrences
+
+### Usage Examples
+```awesome
+[str.needle.count main="l" haystack="hello world" /]  // Returns: 3
+[str.needle.pos_first main="o" haystack="hello world" /]  // Returns: 4
+[str.needle.replace main="o" haystack="hello world" replacement="0" /]  // Returns: hell0 w0rld
+```
+
+## String Padding Services (str.pad)
+
+### Available Services
+- str.pad.left - Left padding
+- str.pad.right - Right padding
+- str.pad.both - Both sides padding
+
+### Usage Examples
+```awesome
+[str.pad.left main="123" length=5 pad_string="0" /]  // Returns: 00123
+[str.pad.right main="hello" length=10 pad_string="-" /]  // Returns: hello-----
+[str.pad.both main="center" length=10 pad_string="*" /]  // Returns: **center**
+```
+
+## String Slice Services (str.slice)
+
+### Available Services
+- str.slice.left - Extract from start
+- str.slice.right - Extract from end
+- str.slice.mid - Extract from middle
+
+### Usage Examples
+```awesome
+[str.slice.left main="hello world" length=5 /]  // Returns: hello
+[str.slice.right main="hello world" length=5 /]  // Returns: world
+[str.slice.mid main="hello world" start=6 length=5 /]  // Returns: world
+```
+
+## Best Practices
+
+1. Always use proper typecasting
+```awesome
+// Good
+[str.create str:"Hello World" /]
+
+// Bad
+[str.create 123 /]
+```
+
+2. Handle errors gracefully
+```awesome
+[cond.block.@validate]
+    [@validate.then.and cond.@=str.comp.eq cond.main={user.input} cond.with="valid"]
+        Process valid input
+    [/@validate.then.and]
+    [@validate.else]
+        Handle invalid input
+    [/@validate.else]
+[/cond.block.@validate]
+```
+
+3. Use pipes for chain operations
+```awesome
+[str.create "  Mixed CASE Example  "
+    pipe:@=str.case.lower
+    pipe.1:@=str.case.title
+    out:@module.set=formatted_text
+/]
+```
+
+4. Always validate input lengths for slice operations
+```awesome
+[cond.block.@check cond.@=int.comp.gt cond.main={text.length} cond.with=int:0]
+    [@check.then]
+        [str.slice.left main={text} length=10 /]
+    [/@check.then]
+[/cond.block.@check]
+```
+
+5. Use appropriate comparison operations
+```awesome
+// Good - Case sensitive when needed
+[str.comp.eq main={input} with="EXACT" /]
+
+// Good - Case insensitive when appropriate
+[str.create {input} pipe:@=str.case.lower pipe.1:@=str.comp.eq pipe.1:with="exact" /]
+```
+
+## String Split Services (str.split)
+
+### Available Services
+
+- str.split.comma - Split string on commas
+- str.split.dot - Split string on dots
+- str.split.ws - Split string on whitespace
+- str.split.separator - Split string on custom separator
+
+### Basic Usage
+
+```awesome
+// Split by comma
+[str.split.comma main="a,b,c,d" /]
+
+// Split by dot
+[str.split.dot main="path.to.value" /]
+
+// Split by whitespace
+[str.split.ws main="hello   world   example" /]
+
+// Split by custom separator
+[str.split.separator main="key|value|data" separator="|" /]
+```
+
+### Output Type
+All split services return an array. The resulting array should be handled appropriately using array services or stored in environment variables.
+
+### Common Use Cases
+
+1. Parsing CSV-style data:
+```awesome
+[str.split.comma main="name,age,city" 
+    out:@module.set=headers
+/]
+```
+
+2. Path traversal:
+```awesome
+[str.split.dot main="module.user.settings" 
+    out:@module.set=path_parts
+/]
+```
+
+3. Processing space-separated input:
+```awesome
+[str.split.ws main="tag1 tag2 tag3" 
+    out:@module.set=tags
+/]
+```
+
+## String Trim Services (str.trim)
+
+### Available Services
+
+- str.trim.left - Remove whitespace from start
+- str.trim.right - Remove whitespace from end
+- str.trim.both - Remove whitespace from both ends
+
+### Basic Usage
+
+```awesome
+// Trim left
+[str.trim.left main="   hello" /]
+
+// Trim right
+[str.trim.right main="world   " /]
+
+// Trim both
+[str.trim.both main="   spaces   " /]
+```
+
+### Usage with Pipes
+
+String trim services are commonly used in pipelines to clean up input:
+
+```awesome
+[str.create "   mixed CASE with spaces   "
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.lower
+    out:@module.set=clean_text
+/]
+```
+
+## Best Practices
+
+1. Always handle input validation:
+```awesome
+[cond.block.@validate]
+    [@validate.then.and cond.@=str.comp.neq cond.main={input} cond.with=""]
+        [str.trim.both main={input} out:@module.set=clean_input /]
+    [/@validate.then.and]
+[/cond.block.@validate]
+```
+
+2. Properly handle split results:
+```awesome
+[str.split.comma main={csv_line} 
+    out:@module.set=parts
+/]
+
+[cond.block.@check]
+    [@check.then.and cond.@=arr.length.eq cond.main={module.parts} cond.with=int:3]
+        Process valid parts
+    [/@check.then.and]
+[/cond.block.@check]
+```
+
+3. Chain trim with other string operations:
+```awesome
+[str.create {user_input}
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.lower
+    pipe.2:@=str.split.ws
+    out:@module.set=words
+/]
+```
+
+4. Use appropriate split service:
+```awesome
+// Good - Using comma split for CSV
+[str.split.comma main={csv_data} /]
+
+// Good - Using custom separator for special formats
+[str.split.separator main={data} separator="|" /]
+
+// Good - Using whitespace split for space-separated values
+[str.split.ws main={tags} /]
+```
+
+5. Handle empty results:
+```awesome
+[cond.block.@process]
+    [@process.then]
+        [str.split.comma main={data} out:@module.set=result /]
+        
+        [cond.block.@check]
+            [@check.then.and cond.@=arr.length.gt cond.main={module.result} cond.with=int:0]
+                Process non-empty result
+            [/@check.then.and]
+        [/cond.block.@check]
+    [/@process.then]
+[/cond.block.@process]
+```

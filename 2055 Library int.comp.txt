@@ -1,0 +1,78 @@
+Samples are available at https://prod.thearks.in/training/int-comp-library
+
+
+# Integer Comparison Library
+
+The `int.comp` library provides a set of services for comparing integer values in AwesomeEnterprise. These services support both direct usage and pipe operations.
+
+## Available Services
+
+All services require integer values and use `int:` prefix for typecasting.
+
+### int.comp.eq
+Checks if two integers are equal
+```
+[int.comp.eq main=int:5 with=int:5 /]  // Returns true
+```
+
+### int.comp.neq
+Checks if two integers are not equal
+```
+[int.comp.neq main=int:5 with=int:3 /]  // Returns true
+```
+
+### int.comp.lt
+Checks if first integer is less than second
+```
+[int.comp.lt main=int:3 with=int:5 /]  // Returns true
+```
+
+### int.comp.gt
+Checks if first integer is greater than second
+```
+[int.comp.gt main=int:8 with=int:5 /]  // Returns true
+```
+
+### int.comp.lte
+Checks if first integer is less than or equal to second
+```
+[int.comp.lte main=int:5 with=int:5 /]  // Returns true
+```
+
+### int.comp.gte
+Checks if first integer is greater than or equal to second
+```
+[int.comp.gte main=int:5 with=int:5 /]  // Returns true
+```
+
+## Usage Patterns
+
+### 1. Direct Usage
+```
+[int.comp.eq main=int:5 with=int:5 /]
+```
+
+### 2. Pipe Usage
+```
+[int.create 5 pipe:@=int.comp.eq pipe:with=int:5 /]
+```
+
+### 3. With Environment Variables
+```
+[env.set counter=int:5 /]
+[env.get counter pipe:@=int.comp.eq pipe:with=int:5 /]
+```
+
+### 4. In Conditions
+```
+[cond.true cond.@=int.comp.gt cond.main=int:10 cond.with=int:5]
+ 10 is greater than 5
+[/cond.true]
+```
+
+## Important Notes
+
+1. All values must be integers
+2. Use `int:` prefix for typecasting
+3. When using pipes, the piped value becomes the 'main' parameter
+4. The 'with' parameter is always required

@@ -1,0 +1,38 @@
+Library 'int' to work with integers
+
+
+int.get
+------------------------
+Gets the Value from a Env Path. Converts it into integer.
+If the Integer Value is zero and there is a default value then the default value is returned.
+
+
+[int.get <some path> default=<default_value> /]
+
+Parameters:
+
+main/unnamed: An environment Path to get
+default: Default value if the main value is 0
+
+
+Example:
+[int.get 'some.path' default=10 /]
+Will get the value from the path and convert into integer. In case the path is not there or the path returns a value of 0 then will return the default value 10 
+
+
+int.create
+----------------------------
+Create & Return value as an Integer
+[int.create <value> /]
+Parameters:
+
+main/unnamed: The Integer Value to create
+
+Example:
+[int.create 42 /]
+
+
+$return_value=(int)$main;	
+
+
+	

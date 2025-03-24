@@ -1,0 +1,182 @@
+# String Library Documentation
+
+## Overview
+The str library provides comprehensive functionality for working with strings in AwesomeEnterprise. It includes services for creating, validating, checking, and manipulating strings.
+
+## Core Services
+
+### Basic String Operations
+
+#### str.create
+Creates and returns a value as a string
+```awesome
+[str.create "Hello World" /]
+[str.create main="Hello World" /]  // Alternative syntax
+```
+
+#### str.get
+Gets string value from environment with optional default
+```awesome
+[str.get main="path.to.value" default="fallback value" /]
+```
+
+### String Validation Services
+
+#### str.is.str
+Check if value is a string
+```awesome
+[str.is.str main="test" /]  // Returns bool:true
+[str.is.str main=42 /]      // Returns bool:false
+```
+
+#### str.is.not_str
+Check if value is not a string
+```awesome
+[str.is.not_str main=42 /]         // Returns bool:true
+[str.is.not_str main="test" /]     // Returns bool:false
+```
+
+### String Content Checks
+
+#### str.is.yes
+Check if string equals "yes"
+```awesome
+[str.is.yes main="yes" /]  // Returns bool:true
+[str.is.yes main="no" /]   // Returns bool:false
+```
+
+#### str.is.no
+Check if string equals "no"
+```awesome
+[str.is.no main="no" /]    // Returns bool:true
+[str.is.no main="yes" /]   // Returns bool:false
+```
+
+### Empty & Whitespace Checks
+
+#### str.is.empty
+Check if string is empty
+```awesome
+[str.is.empty main="" /]        // Returns bool:true
+[str.is.empty main="test" /]    // Returns bool:false
+```
+
+#### str.is.not_empty
+Check if string is not empty
+```awesome
+[str.is.not_empty main="test" /]    // Returns bool:true
+[str.is.not_empty main="" /]        // Returns bool:false
+```
+
+#### str.is.whitespace
+Check if string is empty or only whitespace
+```awesome
+[str.is.whitespace main="   " /]    // Returns bool:true
+[str.is.whitespace main="test" /]   // Returns bool:false
+```
+
+#### str.is.not_whitespace
+Check if string contains non-whitespace characters
+```awesome
+[str.is.not_whitespace main="test" /]   // Returns bool:true
+[str.is.not_whitespace main="   " /]    // Returns bool:false
+```
+
+### String Search Operations
+
+#### str.is.in
+Check if a string exists within another string/content
+```awesome
+[str.is.in main="world" haystack="Hello world" /]     // Returns bool:true
+[str.is.in main="test" haystack="Hello world" /]      // Returns bool:false
+```
+
+#### str.is.not_in
+Check if a string does not exist within another string/content
+```awesome
+[str.is.not_in main="test" haystack="Hello world" /]    // Returns bool:true
+[str.is.not_in main="world" haystack="Hello world" /]   // Returns bool:false
+```
+
+### String Manipulation
+
+#### str.append
+Append string to target string
+```awesome
+[str.append main="World" target="template.greeting" separator=" " /]
+```
+
+#### str.prepend
+Prepend string to target string
+```awesome
+[str.prepend main="Hello" target="template.greeting" separator=" " /]
+```
+
+## Best Practices
+
+1. Always use typecasting with str: prefix when working with string values
+2. Use str.is.str to validate string type before operations
+3. Handle empty strings with str.is.empty or str.is.not_empty
+4. Use str.is.whitespace for input validation
+5. Prefer str.append/prepend with separator for clean string concatenation
+6. Use str.is.in/not_in for substring checks instead of direct comparison
+
+## Common Use Cases
+
+### 1. Input Validation
+```awesome
+[cond.block.@validate cond.@=str.is.not_whitespace cond.main={user_input}]
+    [@validate.then]
+        Valid input processing
+    [/@validate.then]
+    [@validate.else]
+        Please enter valid input
+    [/@validate.else]
+[/cond.block.@validate]
+```
+
+### 2. Conditional String Building
+```awesome
+[str.create "Hello" out:@template.set=greeting /]
+[cond.block.@check cond.@=str.is.yes cond.main={include_title}]
+    [@check.then]
+        [str.append main="Mr." target="template.greeting" separator=" " /]
+    [/@check.then]
+[/cond.block.@check]
+```
+
+### 3. String Content Checking
+```awesome
+[cond.block.@verify 
+    cond.@=str.is.in 
+    cond.main="@" 
+    cond.haystack={email}
+]
+    [@verify.then]
+        Valid email format
+    [/@verify.then]
+    [@verify.else]
+        Invalid email format
+    [/@verify.else]
+[/cond.block.@verify]
+```
+
+## Error Handling
+
+1. Invalid Type Errors
+```awesome
+// Will throw error - main not string
+[str.is.empty main=42 /]
+
+// Correct usage with typecasting
+[str.is.empty main="str:42" /]
+```
+
+2. Missing Required Parameters
+```awesome
+// Will throw error - missing target
+[str.append main="World" /]
+
+// Correct usage
+[str.append main="World" target="template.greeting" /]
+```

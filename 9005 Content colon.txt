@@ -1,0 +1,69 @@
+
+<h3>Running content directly</h3>
+[code.dump]
+<pre>
+[content.run]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.run]
+</pre>
+[/code.dump]
+
+[content.run]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.run]
+
+
+<h3>Running content which is stored in env - fails</h3>
+
+[code.dump]
+<pre>
+[content.get out:@module.set=mycontent]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.get]
+
+[content.run]
+	[module.get mycontent /]
+[/content.run]
+
+</pre>
+[/code.dump]
+
+This fails as content will only get parsed once
+[content.get out:@module.set=mycontent]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.get]
+
+[content.run]
+	[module.get mycontent /]
+[/content.run]
+
+
+
+<h3>Running content which is stored in env - succeeds - using content:@=<env path></h3>
+
+[code.dump]
+<pre>
+[content.get out:@module.set=mycontent]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.get]
+
+[content.run content:@=module.mycontent /]
+
+</pre>
+[/code.dump]
+
+hello
+This succeeds 
+[content.get out:@module.set=mycontent]
+	[module.set running='I am inside content' /]
+	[module.get running /]
+[/content.get]
+
+[content.run content:@=module.mycontent /]
+
+

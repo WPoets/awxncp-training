@@ -1,0 +1,76 @@
+# String Comparison Library
+
+The `str.comp` library provides a set of services for comparing string values in AwesomeEnterprise. These services support both direct usage and pipe operations.
+
+## Available Services
+
+All services require string values and use `str:` prefix for typecasting.
+
+### str.comp.eq
+Checks if two strings are equal (case-sensitive)
+```
+[str.comp.eq main="str:hello" with="str:hello" /]  // Returns true
+```
+
+### str.comp.neq
+Checks if two strings are not equal
+```
+[str.comp.neq main="str:hello" with="str:world" /]  // Returns true
+```
+
+### str.comp.lt
+Checks if first string is lexicographically less than second
+```
+[str.comp.lt main="str:apple" with="str:banana" /]  // Returns true
+```
+
+### str.comp.gt
+Checks if first string is lexicographically greater than second
+```
+[str.comp.gt main="str:zebra" with="str:apple" /]  // Returns true
+```
+
+### str.comp.lte
+Checks if first string is lexicographically less than or equal to second
+```
+[str.comp.lte main="str:apple" with="str:apple" /]  // Returns true
+```
+
+### str.comp.gte
+Checks if first string is lexicographically greater than or equal to second
+```
+[str.comp.gte main="str:apple" with="str:apple" /]  // Returns true
+```
+
+## Usage Patterns
+
+### 1. Direct Usage
+```
+[str.comp.eq main="str:hello" with="str:hello" /]
+```
+
+### 2. Pipe Usage
+```
+[str.create "hello" pipe:@=str.comp.eq pipe:with="str:hello" /]
+```
+
+### 3. With Environment Variables
+```
+[env.set greeting="str:hello" /]
+[env.get greeting pipe:@=str.comp.eq pipe:with="str:hello" /]
+```
+
+### 4. In Conditions
+```
+[cond.true cond.@=str.comp.gt cond.main="str:zebra" cond.with="str:apple"]
+ 'zebra' comes after 'apple'
+[/cond.true]
+```
+
+## Important Notes
+
+1. All comparisons are case-sensitive
+2. Lexicographical comparison uses PHP's strcmp() function
+3. Use `str:` prefix for typecasting
+4. When using pipes, the piped value becomes the 'main' parameter
+5. The 'with' parameter is always required

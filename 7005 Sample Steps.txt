@@ -1,0 +1,133 @@
+step with 
+c. cond: {@form_data.visible.personal_email}=yes
+
+type=field
+service: lt_ui_atoms.personal-email.render
+data to pass:
+	required= literal yes
+	personal_email = {@form_data.lapp.personal_email}
+	placeholder: Enter Personal Email
+	label: 
+		icon=email
+	
+	output_key= personal_email
+
+	
+outputs
+
+    [step @new type=field c.cond={@form_data.visible.personal_email} c.eq=yes]      
+      [service]lt_ui_atoms.personal-email.render[/service]
+      [data]
+        [required _value=yes /]
+        [personal_email _value={@form_data.lapp.personal_email} /]
+        [placeholder _value='Enter Personal Email' /]
+        [label icon='email' /]
+        [output_key _value='personal_email' /]
+      [/data]
+    [/step]
+
+	
+
+
+
+[arr.create o.set=module.form_builder]
+  [steps]
+    //**Personal Email Field**//
+    [step @new type=field c.cond={@form_data.visible.personal_email} c.eq=yes]      
+      [service]lt_ui_atoms.personal-email.render[/service]
+      [data]
+        [required _value=yes /]
+        [personal_email _value={@form_data.lapp.personal_email} /]
+        [placeholder _value='Enter Personal Email' /]
+        [label icon='email' /]
+        [output_key _value='personal_email' /]
+      [/data]
+    [/step]
+
+    //**Mobile Number Field**//
+    [step @new type=field c.cond={@form_data.visible.mobile_number} c.eq=yes]      
+      [service]lt_ui_atoms.mobile-number.render[/service]
+      [data]
+        [required _value=yes /]
+        [mobile_number _value={@form_data.lapp.mobile_number} /]
+        [placeholder _value='Enter Mobile Number' /]
+        [label icon='phone_iphone' /]
+        [output_key _value='mobile_number' /]
+      [/data]
+    [/step]
+
+    //**Home Zipcode Field**//
+    [step @new type=field c.cond={@form_data.visible.home_zipcode} c.eq=yes]      
+      [service]lt_ui_atoms.home-zipcode.render[/service]
+      [data]
+        [required _value=yes /]
+        [channel_code _value={@form_data.lapp.channel_code} /]
+        [home_zipcode _value={@form_data.lapp.home_zipcode} /]
+        [placeholder _value='Home Zipcode' /]
+        [label icon='location_city' /]
+        [output_key _value='home_zipcode' /]
+      [/data]
+    [/step]
+
+    //**Business Zipcode Field**//
+    [step @new type=field c.cond={@form_data.visible.business_zipcode} c.eq=yes]      
+      [service]lt_ui_atoms.business-zipcode.render[/service]
+      [data]
+        [required _value=yes /]
+        [channel_code _value={@form_data.lapp.channel_code} /]
+        [business_zipcode _value={@form_data.lapp.business_zipcode} /]
+        [placeholder _value='Business Zipcode' /]
+        [label icon='location_city' /]
+        [output_key _value='business_zipcode' /]
+      [/data]
+    [/step]
+
+    //**Loan City Field**//
+    [step @new type=field c.cond={@form_data.visible.loan_city} c.eq=yes]      
+      [service]lt_ui_atoms.loan-city.render[/service]
+      [data]
+        [cities _value={@form_data.cities} /]
+        [required _value=yes /]
+        [loan_city _value={@form_data.lapp.loan_city} /]
+        [placeholder _value='Select Loan City' /]
+        [label icon='location_city' /]
+        [output_key _value='loan_city' /]
+      [/data]
+    [/step]
+
+    //**Fixed Income Field**//
+    [step @new type=field c.cond={@form_data.visible.fixed_income} c.eq=yes]      
+      [service]lt_ui_atoms.fixed_income.render[/service]
+      [data]
+        [required _value=yes /]
+        [input_value _value={@form_data.lapp.fixed_income} /]
+        [placeholder _value='Enter Fixed Income As Per Bank Statement' /]
+        [label icon='wallet' title1='Monthly Take-Home Salary' /]
+        [output_key _value='fixed_income' /]
+      [/data]
+    [/step]
+
+    //**Business Annual Income Field**//
+    [step @new type=field c.cond={@form_data.visible.business_annual_income} c.eq=yes]      
+      [service]lt_ui_atoms.business_annual_income.render[/service]
+      [data]
+        [required _value=yes /]
+        [input_value _value={@form_data.lapp.business_annual_income} /]
+        [placeholder _value='Enter Business Annual Income As per latest ITR filled' /]
+        [label icon='wallet' title1='What is your Gross Total Income as per ITR?' /]
+        [output_key _value='business_annual_income' /]
+      [/data]
+    [/step]
+
+    //**Terms and Conditions Consent Field**//
+    [step @new type=field c.cond={@form_data.visible.mobile_consent} c.eq=yes]      
+      [service]lt_ui_atoms.mobile-consent.render[/service]
+      [data]
+        [required _value=yes /]
+        [title consent_label _value={@form_data.mobile_consent_text} /]
+        [terms_and_conditions _value={@form_data.lapp.terms_and_conditions} /]
+        [output_key _value='terms_and_conditions' /]
+      [/data]
+    [/step]
+  [/steps]
+[/arr.create]

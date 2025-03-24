@@ -1,0 +1,37 @@
+This document outlines how the code in AwesomeEnterpise is stored
+
+At the highest level are Collections. Imagine the collections like a folder.
+Collections have modules.
+Modules are like files where code can be written.
+You can directly write the code in a module or divide the code into units called templates
+
+Hierarchy
+--------------
+
+Collection1
+	module1
+	module2
+		template1
+		template2
+
+
+
+Example of module without any templates
+-----------------------------------------
+
+I am a module without a template
+[str.create 'hello' /]
+	 
+
+Example of module with templates
+-----------------------------------------
+
+[templates.add template1]
+	I am template 1
+[/templates.add]
+
+[templates.add template2]
+	I am template 2
+	[env.set x='template1' /]
+	[env.x /]
+[/templates.add]

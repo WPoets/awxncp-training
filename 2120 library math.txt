@@ -1,0 +1,71 @@
+This doc outlines the 'math' library. The math library helps in working with mathematical expressions
+
+
+math.solve
+---------------
+Solve a mathematical expression
+[math.solve 'math expression' /]
+
+main/unnamed attribute is a literal value and not an env path.
+
+Evaluates the expression and returns the result.
+
+Only allows the following:
+hyphen, digit, dot, parentheses, plus, asterisk, forward slash, or percent sign.
+This uses php eval to evaluate the math expression.
+Hence for power eg 2^3 use 2**3 as power in php is represented by **
+
+example 1::
+[math.solve '2*3' /]
+returns 6
+
+
+example 2::
+[do.@math]
+	[env.set @math.a=5 /]
+	[env.set @math.b=2 /]
+	[env.set @math.c=3 /]
+  
+	[math.solve "{@math.a}*({@math.b}+{@math.c} + 4)" /]
+  
+[/do.@math]
+
+will return 45	
+
+[math.solve "2 + 3" /]
+
+
+
+math.minus_one
+------------------
+Subtracts 1 from the value and returns
+You can use this to decrement counters
+
+
+[math.minus_one 'some value']
+main/unnamed attribute is a literal value and not an env path.
+
+example::
+
+[int.create 5 o.set=math_val /]
+[math.minus_one '{math_val}' /]
+
+returns 4
+
+
+math.plus_one
+------------------
+Adds 1 to the value and returns
+You can use this to increment counters
+
+[math.plus_one 'some value']
+main/unnamed attribute is a literal value and not an env path.
+
+example::
+
+[int.create 5 o.set=math_val /]
+[math.plus_one '{math_val}' /]
+
+returns 6
+
+

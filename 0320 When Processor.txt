@@ -1,0 +1,169 @@
+When Processors. In this document we define all the When Processor avaiable in Awesome Enterprise
+
+You can use when to skip the execution of the shortcode.
+
+The `when:` processor allows conditional execution of shortcodes based on logical checks
+if there is a When Processor and it evaluates to false then the shortcode execution is skipped.
+
+
+here is the structure
+
+[str.create 
+  	when:@=int.is.odd when:main=int:5
+  	when:or.@=int.is.odd when:or.main=int:6
+/]
+
+The main condition is represented as 
+
+when:@=<service>
+when:<att1>=<value>
+when:<att2>=<value>
+
+If you only specify the above condition then it must evaluate to true to execute
+
+You can add an and condition
+
+when:and.@=<service>
+when:and.<att1>=<value>
+when:and.<att2>=<value>
+
+
+You can also alternatively add an or condition
+
+when:or.@=<service>
+when:or.<att1>=<value>
+when:or.<att2>=<value>
+
+Notes::
+a) The base condition is necessary to use a when.
+You can add an and conditon or and or condition after that. Adding both gives an error.
+You cannot add more than 1 and condition or more than 1 or condition.
+
+b) The service must reply with a boolean true or false. The data type must be boolean.
+You can use any service which returns a boolean true or false.
+
+
+
+Sample When
+----------------
+# When Processor Examples in AwesomeEnterprise
+
+The `when:` processor allows conditional execution of shortcodes based on logical checks. Here are practical examples showing how to use it effectively.
+
+## Basic Usage
+
+### 1. Simple Integer Comparison
+```awesome
+[str.create "Processing approved" 
+    when:@=int.comp.eq when:main=int:5 when:with=int:5
+/]
+```
+*Will execute only if 5 equals 5*
+
+### 2. Age Check with Multiple Conditions
+```awesome
+[str.create "Adult user"
+    when:@=int.comp.gte when:main=int:18 when:with=int:18
+    when:and.@=int.comp.lt when:and.main=int:18 when:and.with=int:65
+/]
+```
+*Will execute only if age is between 18 and 65*
+
+### 3. String Equality Check
+```awesome
+[str.create "Access granted"
+    when:@=str.comp.eq when:main="str:admin" when:with="str:admin"
+/]
+```
+*Will execute only if string equals "admin"*
+
+## Using OR Conditions
+
+### 4. Multiple Valid Status Checks
+```awesome
+[str.create "Status is valid"
+    when:@=str.comp.eq when:main="str:active" when:with="str:active"
+    when:or.@=str.comp.eq when:or.main="str:pending" when:or.with="str:pending"
+/]
+```
+*Will execute if status is either "active" or "pending"*
+
+### 5. Number Range Check
+```awesome
+[str.create "Temperature is extreme"
+    when:@=int.comp.gt when:main=int:35 when:with=int:35
+    when:or.@=int.comp.lt when:or.main=int:0 when:or.with=int:0
+/]
+```
+*Will execute if temperature is above 35 or below 0*
+
+==================================================================
+Invalid case and will give an error
+
+### 6. Combining AND and OR
+```awesome
+[str.create "Valid user settings"
+    when:@=str.is.not_empty when:main={user.name}
+    when:and.@=int.comp.gte when:and.main=int:18 when:and.with=int:18
+    when:or.@=bool.is.true when:or.main={user.is_admin}
+/]
+```
+*will give an error since both and and or are not allowed*
+
+
+## Best Practices
+
+1. Always use appropriate type casting:
+```awesome
+// Good
+when:main="int:5"
+when:main="str:hello"
+when:main="num:10.5"
+when:main="bool:true"
+
+// Bad
+when:main="5"
+when:main=5
+```
+
+2. Use meaningful condition names:
+```awesome
+// Good
+[str.create "Processing order"
+    when:@=int.comp.gt when:main={order.total} when:with="num:0"
+    when:and.@=bool.is.true when:and.main={stock.available}
+/]
+
+// Avoid cryptic conditions
+[str.create "Processing"
+    when:@=int.comp.gt when:main={x} when:with="num:0"
+    when:and.@=bool.is.true when:and.main={y}
+/]
+```
+
+
+## Common Use Cases
+
+### Form Validation
+```awesome
+[str.create "Form submitted successfully"
+    when:@=str.is.not_empty when:main={form.email}
+    when:and.@=str.is.not_empty when:and.main={form.password}
+/]
+```
+
+### Configuration Checks
+```awesome
+[str.create "Feature enabled"
+    when:@=bool.is.true when:main={config.feature_flag}
+    when:and.@=str.comp.eq when:and.main={env.mode} when:and.with="str:production"
+/]
+```
+
+### Role-Based Access
+```awesome
+[str.create "Admin panel access granted"
+    when:@=str.comp.eq when:main={user.role} when:with="str:admin"
+    when:or.@=str.comp.eq when:or.main={user.role} when:or.with="str:superuser"
+/]
+```

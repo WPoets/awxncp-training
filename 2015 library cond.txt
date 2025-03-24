@@ -1,0 +1,859 @@
+https://prod.thearks.in/training/cond-block-library
+https://prod.thearks.in/training/cond-select
+https://prod.thearks.in/training/cond-switch
+
+
+# Conditional Library Documentation
+
+## Overview
+The conditional library (cond) provides three levels of conditional execution in AwesomeEnterprise:
+1. Simple conditions (cond.true/cond.false)
+2. Service selection (cond.select)
+3. Complex blocks (cond.block)
+
+
+## Condition Structure
+Both primary and secondary conditions follow the same structure. Each condition can have:
+
+### Basic Condition (Optional, defaults to true if not specified)
+```awesome
+cond.@=<service>          // Service to execute
+cond.att1=<value>         // Attributes for the service
+cond.att2=<value>         // More attributes as needed
+```
+
+### AND Condition (Optional)
+```awesome
+cond.and.@=<service>      // AND service to execute
+cond.and.att1=<value>     // Attributes for AND service
+cond.and.att2=<value>     // More attributes as needed
+```
+
+### OR Condition (Optional)
+```awesome
+cond.or.@=<service>       // OR service to execute
+cond.or.att1=<value>      // Attributes for OR service
+cond.or.att2=<value>      // More attributes as needed
+```
+
+### Condition Evaluation
+- If no condition is specified, it evaluates to true
+- Basic condition must be true OR
+- (Basic condition AND and-condition must be true) OR
+- Or-condition must be true
+
+
+## Simple Conditional Services
+
+### cond.true
+Executes content only if condition evaluates to true.
+
+#### Basic Structure
+```awesome
+[cond.true
+    cond.@=<service>
+    cond.<param1>=<value1>
+    cond.<param2>=<value2>
+]
+    // Content to execute if true
+[/cond.true]
+```
+
+#### Examples
+
+1. Basic Number Comparison
+```awesome
+[env.set score=int:85 /]
+
+[cond.true
+    cond.@=num.comp.gte
+    cond.main={score}
+    cond.with=num:80
+]
+    High Score Achieved!
+[/cond.true]
+```
+
+2. String Validation
+```awesome
+[env.set email="user@example.com" /]
+
+[cond.true
+    cond.@=str.is.not_empty
+    cond.main={email}
+]
+    [email_id.create main={email} out:@env.set=validated_email /]
+[/cond.true]
+```
+
+3. Multiple Conditions
+```awesome
+[env.set_array user]
+    [age _value=int:25 /]
+    [subscription]premium[/subscription]
+[/env.set_array]
+
+[cond.true
+    cond.@=int.comp.gte
+    cond.main={user.age}
+    cond.with=int:18
+    cond.and.@=str.comp.eq
+    cond.and.main={user.subscription}
+    cond.and.with="premium"
+]
+    Adult Premium Member Access Granted
+[/cond.true]
+```
+
+### cond.false
+Executes content only if condition evaluates to false.
+
+#### Basic Structure
+```awesome
+[cond.false
+    cond.@=<service>
+    cond.<param1>=<value1>
+    cond.<param2>=<value2>
+]
+    // Content to execute if false
+[/cond.false]
+```
+
+#### Examples
+
+1. Error Handling
+```awesome
+[cond.false
+    cond.@=str.is.empty
+    cond.main={error_message}
+]
+    [debug2.alert main={error_message} /]
+[/cond.false]
+```
+
+```
+
+3. Access Control
+```awesome
+[env.set_array user]
+    [role]guest[/role]
+[/env.set_array]
+
+[cond.false
+    cond.@=str.comp.eq
+    cond.main={user.role}
+    cond.with="admin"
+]
+    Access Denied: Admin privileges required
+[/cond.false]
+```
+
+
+
+https://prod.thearks.in/training/cond-switch
+
+### cond.switch
+For handling multiple conditional paths with either value matching or conditions. Provides a context-based approach similar to traditional switch-case statements.
+
+#### Basic Structure
+```awesome
+[cond.switch.@context value={some.value}]
+    [@context.case match="value1"]
+        // Code for value1
+    [/@context.case]
+    [@context.case match="value2"]
+        // Code for value2
+    [/@context.case]
+    [@context.default]
+        // Default code
+    [/@context.default]
+[/cond.switch.@context]
+```
+
+Or using conditions:
+
+```awesome
+[cond.switch.@context]
+    [@context.case 
+        cond.@=<service>
+        cond.<param1>=<value1>
+    ]
+        // Code for first condition
+    [/@context.case]
+    [@context.case 
+        cond.@=<service>
+        cond.<param2>=<value2>
+    ]
+        // Code for second condition
+    [/@context.case]
+    [@context.default]
+        // Default code
+    [/@context.default]
+[/cond.switch.@context]
+```
+
+#### Examples
+
+1. Value-Based Matching
+```awesome
+[env.set status="pending" /]
+
+[cond.switch.@status value={status}]
+    [@status.case match="pending"]
+        Order is pending
+    [/@status.case]
+    [@status.case match="processing"]
+        Order is being processed
+    [/@status.case]
+    [@status.default]
+        Unknown order status
+    [/@status.default]
+[/cond.switch.@status]
+```
+
+2. Condition-Based Matching
+```awesome
+[env.set score=num:85 /]
+
+[cond.switch.@grade]
+    [@grade.case 
+        cond.@=num.comp.gte
+        cond.main={score}
+        cond.with=num:90
+    ]
+        Grade: A
+    [/@grade.case]
+    [@grade.case 
+        cond.@=num.comp.gte
+        cond.main={score}
+        cond.with=num:80
+    ]
+        Grade: B
+    [/@grade.case]
+    [@grade.default]
+        Grade: C
+    [/@grade.default]
+[/cond.switch.@grade]
+```
+
+3. Nested Switch Statements
+```awesome
+[env.set_array user]
+    [type]premium[/type]
+    [score _value=num:95 /]
+[/env.set_array]
+
+[cond.switch.@check value={user.type}]
+    [@check.case match="premium"]
+        [cond.switch.@score]
+            [@score.case
+                cond.@=num.comp.gte
+                cond.main={user.score}
+                cond.with=num:90
+            ]
+                Premium user with high score
+            [/@score.case]
+            [@score.default]
+                Premium user with regular score
+            [/@score.default]
+        [/cond.switch.@score]
+    [/@check.case]
+    [@check.default]
+        Regular user
+    [/@check.default]
+[/cond.switch.@check]
+```
+
+#### Important Rules
+
+1. Case Evaluation
+   - Cases are evaluated in order
+   - First matching case is executed
+   - Other cases are skipped even if they would match
+   - Default executes only if no cases match
+
+2. Value Matching
+   - Requires value parameter in switch
+   - Uses match parameter in case
+   - Matches are strict (===)
+   - Type handling is automatic through Awesome Enterprise type system
+
+3. Condition Matching
+   - Use when value matching isn't suitable
+   - Follows same condition structure as other cond services
+   - Supports AND/OR conditions
+
+#### Common Errors
+
+1. Missing Match Parameter
+```awesome
+// WRONG - Will throw error
+[cond.switch.@status value="pending"]
+    [@status.case]
+        Should throw error
+    [/@status.case]
+[/cond.switch.@status]
+
+// CORRECT
+[cond.switch.@status value="pending"]
+    [@status.case match="pending"]
+        Correct usage
+    [/@status.case]
+[/cond.switch.@status]
+```
+
+2. Match Without Value
+```awesome
+// WRONG - Will throw error
+[cond.switch.@status]
+    [@status.case match="pending"]
+        Should throw error
+    [/@status.case]
+[/cond.switch.@status]
+
+// CORRECT
+[cond.switch.@status]
+    [@status.case 
+        cond.@=str.comp.eq
+        cond.main={status}
+        cond.with="pending"
+    ]
+        Correct usage
+    [/@status.case]
+[/cond.switch.@status]
+```
+
+#### Best Practices
+
+1. Prefer Value Matching When Possible
+```awesome
+// Good - Clear and concise
+[cond.switch.@type value={user.type}]
+    [@type.case match="admin"]
+        Admin Access
+    [/@type.case]
+    [@type.case match="user"]
+        User Access
+    [/@type.case]
+[/cond.switch.@type]
+```
+
+2. Use Conditions for Complex Logic
+```awesome
+// Good - Complex conditions
+[cond.switch.@access]
+    [@access.case 
+        cond.@=str.comp.eq
+        cond.main={user.role}
+        cond.with="admin"
+        cond.and.@=bool.is.true
+        cond.and.main={user.is_active}
+    ]
+        Active Admin Access
+    [/@access.case]
+[/cond.switch.@access]
+```
+
+3. Always Include Default
+```awesome
+// Good - Handles all cases
+[cond.switch.@status value={status}]
+    [@status.case match="active"]
+        Active user
+    [/@status.case]
+    [@status.default]
+        Unknown status
+    [/@status.default]
+[/cond.switch.@status]
+```
+
+4. Clear Case Organization
+```awesome
+// Good - Most specific to least specific
+[cond.switch.@error value={error.code}]
+    [@error.case match="AUTH001"]
+        Specific authentication error
+    [/@error.case]
+    [@error.case 
+        cond.@=str.starts_with
+        cond.main={error.code}
+        cond.with="AUTH"
+    ]
+        General authentication error
+    [/@error.case]
+    [@error.default]
+        Unknown error
+    [/@error.default]
+[/cond.switch.@error]
+```
+
+#### Common Use Cases
+
+1. Status Handling
+```awesome
+[cond.switch.@status value={order.status}]
+    [@status.case match="new"]
+        Process new order
+    [/@status.case]
+    [@status.case match="processing"]
+        Update order status
+    [/@status.case]
+    [@status.case match="completed"]
+        Send completion email
+    [/@status.case]
+    [@status.default]
+        Log unknown status
+    [/@status.default]
+[/cond.switch.@status]
+```
+
+2. Complex Permission Checks
+```awesome
+[cond.switch.@access]
+    [@access.case
+        cond.@=str.comp.eq
+        cond.main={user.role}
+        cond.with="admin"
+    ]
+        Full access
+    [/@access.case]
+    [@access.case
+        cond.@=num.comp.gte
+        cond.main={user.access_level}
+        cond.with=int:5
+    ]
+        Limited access
+    [/@access.case]
+    [@access.default]
+        Basic access
+    [/@access.default]
+[/cond.switch.@access]
+```
+
+3. Error Classification
+```awesome
+[cond.switch.@error value={error.type}]
+    [@error.case match="validation"]
+        Handle validation errors
+    [/@error.case]
+    [@error.case match="auth"]
+        Handle authentication errors
+    [/@error.case]
+    [@error.case match="network"]
+        Handle network errors
+    [/@error.case]
+    [@error.default]
+        Handle unknown errors
+    [/@error.default]
+[/cond.switch.@error]
+```
+
+### cond.select
+Selects between two services based on a condition. Ideal for binary decisions.
+
+#### Basic Structure
+```awesome
+[cond.select
+    cond.@=<service>
+    cond.<param1>=<value1>
+    then.@=<service>
+    then.<param1>=<value1>
+    else.@=<service>
+    else.<param1>=<value1>
+/]
+```
+
+#### Examples
+
+1. User Greeting
+```awesome
+[env.set user_name="" /]
+
+[cond.select
+    cond.@=str.is.empty
+    cond.main={user_name}
+    then.@=str.create
+    then.main="Welcome Guest"
+    else.@=str.create
+    else.main="Welcome back, {user_name}"
+/]
+```
+
+2. Score Classification
+```awesome
+[env.set score=num:75.5 /]
+
+[cond.select
+    cond.@=num.comp.gte
+    cond.main={score}
+    cond.with=num:70
+    then.@=str.create
+    then.main="Passed"
+    else.@=str.create
+    else.main="Failed"
+/]
+```
+
+### cond.block
+For complex conditional logic with multiple paths and outcomes.
+
+#### Basic Structure
+```awesome
+[cond.block.@context primary_condition]
+    [@context.then]
+        // Execute if primary true
+    [/@context.then]
+    
+    [@context.else]
+        // Execute if primary false
+    [/@context.else]
+[/cond.block.@context]
+```
+
+# Conditional Block Library (cond.block)
+
+The `cond.block` library provides a powerful way to handle conditional logic with complex branching. It uses a context-based approach with clear then/else branches.
+
+## Basic Structure
+```awesome
+[cond.block.@context primary_condition]
+    [@context.then]
+        // Runs if primary condition is true
+    [/@context.then]
+    
+    [@context.else]
+        // Runs if primary condition is false
+    [/@context.else]
+    
+    [@context.then.and secondary_condition]
+        // Runs if primary=true AND secondary=true
+    [/@context.then.and]
+    
+    [@context.then.not secondary_condition]
+        // Runs if primary=true AND secondary=false
+    [/@context.then.not]
+    
+    [@context.else.and secondary_condition]
+        // Runs if primary=false AND secondary=true
+    [/@context.else.and]
+    
+    [@context.else.not secondary_condition]
+        // Runs if primary=false AND secondary=false
+    [/@context.else.not]
+    
+    [@context.or secondary_condition]
+        // Runs if either primary OR this condition is true
+    [/@context.or]
+[/cond.block.@context]
+```
+
+
+## Examples with Full Condition Structure
+
+### 1. Primary with All Conditions
+```awesome
+[cond.block.@validate 
+    cond.@=int.comp.gt cond.main=int:10 cond.with=int:5
+    cond.and.@=int.comp.lt cond.and.main=int:10 cond.and.with=int:20
+    cond.or.@=int.comp.eq cond.or.main=int:15 cond.or.with=int:15
+]
+    [@validate.then]
+        Condition met
+    [/@validate.then]
+[/cond.block.@validate]
+```
+
+### 2. Secondary Block with All Conditions
+```awesome
+[cond.block.@check cond.@=int.comp.gt cond.main=int:10 cond.with=int:5]
+    [@check.then.and 
+        cond.@=int.comp.lt cond.main=int:15 cond.with=int:20
+        cond.and.@=int.comp.neq cond.and.main=int:15 cond.and.with=int:16
+        cond.or.@=int.comp.eq cond.or.main=int:15 cond.or.with=int:15
+    ]
+        Both conditions met
+    [/@check.then.and]
+[/cond.block.@check]
+```
+
+### 3. No Condition (Always True)
+```awesome
+[cond.block.@check]
+    [@check.then]
+        This always executes
+    [/@check.then]
+[/cond.block.@check]
+```
+
+## Available Blocks
+
+### Primary Blocks
+- `then` - Executes when primary condition is true
+- `else` - Executes when primary condition is false
+
+### Compound Blocks
+- `then.and` - Primary true AND secondary true
+- `then.not` - Primary true AND secondary false
+- `else.and` - Primary false AND secondary true
+- `else.not` - Primary false AND secondary false
+- `or` - Either primary OR secondary true
+
+## Parameters
+
+### Main Block Parameters
+- `cond.@` - Service to execute for condition
+- `cond.<param>` - Parameters for the condition service
+
+### Secondary Block Parameters
+- `cond.@` - Service for secondary condition
+- `cond.<param>` - Parameters for secondary condition
+
+## Using Output Handlers
+All blocks support output handling using the out: syntax:
+```awesome
+[@context.then out:@module.set=result]
+    Content
+[/@context.then]
+```
+
+## Common Patterns
+
+### 1. Basic If/Else
+```awesome
+[cond.block.@check cond.@=int.comp.eq cond.main=int:5 cond.with=int:5]
+    [@check.then]
+        Equal
+    [/@check.then]
+    [@check.else]
+        Not Equal
+    [/@check.else]
+[/cond.block.@check]
+```
+
+### 2. Multiple Conditions
+```awesome
+[cond.block.@validate cond.@=int.comp.gt cond.main=int:10 cond.with=int:5]
+    [@validate.then.and cond.@=int.comp.lt cond.main=int:10 cond.with=int:20]
+        Between 5 and 20
+    [/@validate.then.and]
+[/cond.block.@validate]
+```
+
+### 3. With Output Handling
+```awesome
+[cond.block.@check cond.@=int.comp.eq cond.main=int:5 cond.with=int:5]
+    [@check.then out:@module.set=result]
+        Match found
+    [/@check.then]
+[/cond.block.@check]
+```
+
+## Common Errors
+
+### 1. Missing @ in Context Name
+```awesome
+// WRONG
+[cond.block.check...]
+
+// CORRECT
+[cond.block.@check...]
+```
+
+### 2. Wrong Block Nesting
+```awesome
+// WRONG
+[cond.block.@check...]
+    [@check.then...]
+        [@check.else...]  // Else cannot be inside then
+        [/@check.else...]
+    [/@check.then...]
+[/cond.block.@check]
+
+// CORRECT
+[cond.block.@check...]
+    [@check.then...]
+    [/@check.then...]
+    [@check.else...]
+    [/@check.else...]
+[/cond.block.@check]
+```
+
+### 3. Missing Condition Parameters
+```awesome
+// WRONG
+[cond.block.@check cond.@=int.comp.eq]
+
+// CORRECT
+[cond.block.@check cond.@=int.comp.eq cond.main=int:5 cond.with=int:5]
+```
+
+
+## Important Notes
+1. Context name must start with @
+2. Condition services must return strictly boolean values
+3. All blocks are optional
+4. Multiple blocks can execute if conditions match
+5. Blocks execute in order of appearance
+```
+
+
+
+
+
+## Choosing the Right Conditional Service
+
+1. Use cond.true/cond.false when:
+   - You need to execute content conditionally
+   - The content includes multiple statements or complex HTML
+   - You want to keep the condition separate from the content
+
+2. Use cond.select when:
+   - You have exactly two possible outcomes
+   - Each outcome is a single service call
+   - You need clean, functional-style code
+
+3. Use cond.block when:
+   - You have complex conditions
+   - You need multiple execution paths
+   - You want structured, hierarchical conditions
+   - You need AND/OR combinations
+
+4. Use cond.switch when:
+   - You want exactly one exception path
+   - You want to have catch all default situation
+   - You want to match against a specific value
+
+
+## Best Practices
+
+1. Type Safety
+```awesome
+// Good - Proper type casting
+[cond.select
+    cond.@=num.comp.gt
+    cond.main=num:42.5
+    cond.with=num:40.0
+    then.@=str.create
+    then.main="str:Above threshold"
+    else.@=str.create
+    else.main="str:Below threshold"
+/]
+```
+
+2. Clear Naming
+```awesome
+[cond.block.@validate_user]
+    [@validate_user.then]
+        Valid User
+    [/@validate_user.then]
+[/cond.block.@validate_user]
+```
+
+3. Error Handling
+```awesome
+[cond.select
+    cond.@=str.is.not_empty
+    cond.main={value}
+    then.@=str.create
+    then.main={value}
+    else.@=str.create
+    else.main="No value provided"
+/]
+```
+
+4. Cond with and condition
+
+[cond.select
+    cond.@=int.comp.gte
+    cond.main={user.age}
+    cond.with=int:18
+    cond.and.@=str.comp.eq
+    cond.and.main={user.subscription}
+    cond.and.with="premium"
+    then.@=str.create
+    then.main="Adult Premium User"
+    else.@=str.create
+    else.main="Access Restricted"
+    out:@env.set=result
+/]
+Adult Premium User if age>18 and premium
+
+
+## Common Patterns
+
+1. Form Validation
+```awesome
+[cond.block.@form]
+    [@form.then.and
+        cond.@=str.is.not_empty
+        cond.main={form.email}
+        cond.and.@=email_id.is.valid
+        cond.and.main={form.email}
+    ]
+        Process Form
+    [/@form.then.and]
+[/cond.block.@form]
+```
+
+2. Access Control
+```awesome
+[cond.select
+    cond.@=str.comp.eq
+    cond.main={user.role}
+    cond.with="admin"
+    then.@=module.run
+    then.main="admin.dashboard"
+    else.@=module.run
+    else.main="user.dashboard"
+/]
+```
+
+3. Error Handling
+```awesome
+[cond.block.@error]
+    [@error.then.and
+        cond.@=str.is.not_empty
+        cond.main={error}
+    ]
+        [debug2.alert main={error} /]
+    [/@error.then.and]
+[/cond.block.@error]
+```
+
+## Error Handling
+
+1. Missing Services
+```awesome
+// Will throw exception - missing else.@
+[cond.select
+    cond.@=str.is.empty
+    cond.main={value}
+    then.@=str.create
+    then.main="Empty"
+/]
+```
+
+2. Invalid Conditions
+```awesome
+// Will throw exception - invalid condition service
+[cond.true
+    cond.@=nonexistent.service
+    cond.main="value"
+]
+    Content
+[/cond.true]
+```
+
+3. Type Mismatches
+```awesome
+// Will throw exception - type mismatch
+[cond.select
+    cond.@=num.comp.gt
+    cond.main="not a number"
+    cond.with=num:5
+    then.@=str.create
+    then.main="Greater"
+    else.@=str.create
+    else.main="Lesser"
+/]
+```

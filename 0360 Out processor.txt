@@ -1,0 +1,226 @@
+# Out Processor Guide in AwesomeEnterprise
+
+The `out:` processor manages the output of shortcodes, allowing you to control where results are stored or how they're processed. By default, shortcodes output their results to the output stream, but `out:` gives you precise control over this behavior.
+
+## Core Concepts
+
+### Basic Rules
+1. The output behavior depends on the service used with out:
+   - Special services like @module.set reply with an empty string
+   - Services like @debug.dump reply with their output
+2. When both out: and out.1: are present, the shortcode replies with out.1:'s return value
+3. The output is not destroyed by out: - the service handling the output determines the return value
+4. If the output is not handled correctly it will appear in the output stream.
+
+out: vs pipe:
+--------------
+out: and pipe: work differently
+
+pipe: is to be used when the current value is to be modified in some way. it is expected that the pipe service will reply with an updated value. It is a bad practice to consume the current value using a pipe:
+
+out: is to handle the output of the shortcode. Typical usage is to save the value or dump the value.  Modifications should be left to pipe:   
+
+ 
+### Special Services
+```awesome
+out:@env.set=<env path>           // Sets value in env path, replies with empty string
+out:@module.set=<module path>     // Sets value in module path, replies with empty string
+out:@template.set=<template path> // Sets value in template path, replies with empty string
+out:@debug.dump=yes              // Dumps value and replies with the dump output
+out:@debug.echo=yes              // Echoes value and replies with empty string
+out:@destroy=yes                 // Does nothing and replies with empty string
+```
+
+## Special Services
+
+### 1. Environment Variable Setting
+```awesome
+[str.create "Hello World"
+    out:@env.set=greeting
+/]
+```
+*Stores result in env.greeting and replies with empty string*
+
+### 2. Module Variable Setting
+```awesome
+[num.create "num:42"
+    out:@module.set=counter
+/]
+```
+*Stores result in module.counter and destroys output*
+
+### 3. Template Variable Setting
+```awesome
+[arr.create
+    out:@template.set=items
+]
+    [@new _value="str:item1" /]
+    [@new _value="str:item2" /]
+[/arr.create]
+```
+*Stores array in template.items and destroys output*
+
+### 4. Debug Operations
+```awesome
+[str.create "Debug info"
+    out:@debug.dump=yes
+/]
+```
+*Dumps output and returns the dump*
+
+```awesome
+[arr.create
+    out:@debug.echo=yes
+]
+    [@new _value="str:test" /]
+[/arr.create]
+```
+*Echoes array and returns empty string*
+
+## Multiple Output Handling
+
+### 5. Using out: and out.1:
+```awesome
+[num.create "num:100"
+    out:@module.set=original_value
+    out.1:@=num.round
+    out.1:precision="int:2"
+/]
+```
+*Stores original value in module.original_value and returns rounded value (since out.1: is present)*
+
+### 6. Storing Multiple Results
+```awesome
+[str.create "Test String"
+    out:@env.set=lowercase_value
+    out.1:@module.set=uppercase_value
+/]
+```
+*Stores result in two different locations*
+
+## Common Use Cases
+
+### 7. Array Processing
+```awesome
+[arr.create
+    out:@module.set=full_list
+    out.1:@=arr_items.slice
+    out.1:start="int:0"
+    out.1:length="int:3"
+]
+    [@new _value="str:item1" /]
+    [@new _value="str:item2" /]
+    [@new _value="str:item3" /]
+    [@new _value="str:item4" /]
+[/arr.create]
+```
+*Stores full array and processes and outputs truncated version*
+
+### 8. Data Transformation Chain
+```awesome
+[str.create "   Example Text   "
+    pipe:@=str.trim.both
+    pipe.1:@=str.case.upper
+    out:@module.set=processed_text
+    out.1:@=str.length
+/]
+```
+*Stores processed text and outputs length*
+
+### 9. Conditional Output
+```awesome
+[num.create "num:42"
+    when:@=num.is.num
+    out:@module.set=valid_number
+    out.1:@debug.echo=yes
+/]
+```
+*Stores and displays number if valid*
+
+### 10. Database Results
+```awesome
+[mysqli.fetch.rows
+    out:@module.set=query_results
+    out.1:@debug.dump=yes
+]
+    SELECT id, name FROM users LIMIT 5
+[/mysqli.fetch.rows]
+```
+*Stores and displays query results*
+
+## Best Practices
+
+### 1. Clear Variable Names
+```awesome
+// Good - Descriptive names
+[str.create {user.input}
+    out:@module.set=sanitized_input
+/]
+
+// Avoid - Unclear names
+[str.create {user.input}
+    out:@module.set=x
+/]
+```
+
+### 2. Proper Output Handling
+```awesome
+// Good - Output is handled
+[arr.create
+    out:@module.set=user_list
+]
+    [@new name="John" age="int:25" /]
+    [@new name="Jane" age="int:30" /]
+[/arr.create]
+
+// Bad - Unhandled output
+[arr.create]
+    [@new name="John" age="int:25" /]
+    [@new name="Jane" age="int:30" /]
+[/arr.create]
+```
+
+### 3. Type Safety
+```awesome
+// Good - Proper type casting
+[num.create "num:100"
+    out:@module.set=amount
+    out.1:@=num.round
+    out.1:precision="int:2"
+/]
+
+// Bad - Missing type casting
+[num.create "100"
+    out:@module.set=amount
+    out.1:@=num.round
+    out.1:precision="2"
+/]
+```
+
+## Advanced Patterns
+
+### 11. Array Merging
+```awesome
+[arr.create
+    pipe:@=arr.merge_with.before
+    pipe:merge_with=existing_array
+	
+	out:@module.set=updated_array
+]
+    [@new _value="str:new_item" /]
+[/arr.create]
+```
+*Merges new items with existing array*
+
+
+## Important Notes
+
+1. Always handle output appropriately - unhandled output goes to output stream
+2. Use descriptive variable names when storing values
+3. The return value depends on the service used with out:
+   - Special services like @module.set return empty string
+   - Services like @debug.dump return their output
+4. When both out: and out.1: are present, the shortcode returns out.1:'s value
+5. Use proper type casting for numeric and boolean values
+6. Consider debugging needs when choosing output handlers
+7. Be consistent with output handling patterns across your code

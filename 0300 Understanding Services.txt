@@ -1,0 +1,53 @@
+This chapter covers understanding services in the system
+
+All the AwesomeEnterprise services are broken into various libraries
+For example there is a library called env which allows you to work with the awesome envrionment
+
+Service consists of 
+a) Service name
+b) 0 or more service attributes
+c) optional Content
+
+
+How to execute a Service
+-----------------------
+
+1:using a shortcode
+----------------------
+You can run a service using a shortcode
+
+[str.create 'Vikas Kumar' /] 
+will run the service str.create
+
+a) Service name: str.create
+b) 0 or more service attributes 
+	main='Vikas Kumar'
+	since unnamed attribute is given the name main
+
+c) optional Content
+	None
+
+[content.run 
+	when:@=int.is.odd when:main=int:5
+]
+	we are equal
+[/content.run]
+
+a) Service name: content.run
+b) 0 or more service attributes 
+	No service attributes. When: are processor attributes
+
+c) optional Content
+	None
+
+	
+
+2:running dynamic services
+---------------------------
+Incase the name of the service is stored in a variable or you need to call a service dynamically u can use service.run
+
+[env.set sname='str.create']
+[service.run service='{env.sname}' main='Dynamic Service' /]
+
+service.run takes all the service attributes and passes it further to the service
+

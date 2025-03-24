@@ -1,0 +1,531 @@
+# AwesomeEnterprise Gutenberg Blocks Training Manual
+
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Field Types](#field-types)
+3. [Block Configuration](#block-configuration) 
+4. [Block Registration](#block-registration)
+5. [Block Rendering](#block-rendering)
+6. [Best Practices](#best-practices)
+7. [Complete Examples](#complete-examples)
+
+## Introduction
+This manual covers how to build Gutenberg blocks in AwesomeEnterprise. The framework provides a structured way to create blocks with tabbed interfaces and various field types.
+
+## Field Types
+
+AwesomeEnterprise supports the following field types for Gutenberg blocks:
+
+### Basic Fields
+
+#### Text Field
+```awesome
+[@new]
+    [type]text[/type]
+    [name]field-name[/name]
+    [label]Field Label[/label]
+    [attr_name]block.field[/attr_name]
+[/@new]
+```
+- Standard text input
+- Single line only
+- Optional validation rules
+
+#### Textarea Field
+```awesome
+[@new]
+    [type]textarea[/type]
+    [name]field-name[/name]
+    [label]Field Label[/label]
+    [attr_name]block.field[/attr_name]
+[/@new]
+```
+- Multi-line text input
+- Resizable area
+- Plain text formatting
+
+#### Small Number Field
+```awesome
+[@new]
+    [type]small-number[/type]
+    [name]field-name[/name]
+    [label]Field Label[/label]
+    [attr_name]block.field[/attr_name]
+    [default]0[/default]
+[/@new]
+```
+- Compact numeric input
+- Optional min/max values
+- Spinner controls
+
+#### Toggle Field
+```awesome
+[@new]
+    [type]toggle[/type]
+    [name]field-name[/name]
+    [label]Field Label[/label]
+    [attr_name]block.field[/attr_name]
+    [default]bool:false[/default]
+[/@new]
+```
+- Boolean on/off switch
+- Default false
+- Visual toggle interface
+
+#### Select Field
+```awesome
+[@new]
+    [type]select[/type]
+    [name]field-name[/name]
+    [label]Field Label[/label]
+    [attr_name]block.field[/attr_name]
+    [options]
+        [@new label="Option 1" value="opt1" /]
+        [@new label="Option 2" value="opt2" /]
+    [/options]
+[/@new]
+```
+- Dropdown menu selection
+- Configurable options
+- Optional default value
+
+### Special Fields
+
+#### Inner Blocks Field
+```awesome
+[@new]
+    [type]innerblocks[/type]
+    [name]content-blocks[/name]
+    [label]Content Blocks[/label]
+    [attr_name]block.content[/attr_name]
+[/@new]
+```
+- Nested Gutenberg blocks container
+- Full block editor capabilities
+- Flexible content structure
+
+#### Attributes Repeater Field
+```awesome
+[@new]
+    [type]attributes-repeater[/type]
+    [name]field-attributes[/name]
+    [label]Field Attributes[/label]
+    [attr_name]block.attributes[/attr_name]
+[/@new]
+```
+- Repeatable attribute fields
+- Name-type-value structure
+- Dynamic attribute addition
+
+### Specialized Fields
+
+#### Title Field
+```awesome
+[@new]
+    [type]title[/type]
+    [name]title[/name]
+    [label]Title[/label]
+    [attr_name]block.title[/attr_name]
+    [validation]
+        [required _value=bool:true /]
+    [/validation]
+[/@new]
+```
+- Required by default
+- Max length 100 characters
+- Single line text input
+
+### Purpose Field
+```awesome
+[@new]
+    [type]purpose[/type]
+    [name]purpose[/name]
+    [label]Purpose[/label]
+    [attr_name]block.purpose[/attr_name]
+[/@new]
+```
+- Multi-line text area
+- Optional by default
+- Used for block descriptions
+
+### Query Field
+```awesome
+[@new]
+    [type]query[/type]
+    [name]main-query[/name]
+    [label]SQL Query[/label]
+    [attr_name]block.query[/attr_name]
+    [validation]
+        [required _value=bool:true /]
+    [/validation]
+[/@new]
+```
+- Monospace font textarea
+- Optimized for SQL queries
+- Multi-line editing
+
+### Date Field
+```awesome
+[@new]
+    [type]date[/type]
+    [name]publish-date[/name]
+    [label]Publication Date[/label]
+    [attr_name]block.date[/attr_name]
+[/@new]
+```
+- Calendar popup interface
+- YYYY-MM-DD format
+- Date validation
+
+### Service Field
+```awesome
+[@new]
+    [type]service[/type]
+    [name]service-name[/name]
+    [label]Service[/label]
+    [attr_name]block.service[/attr_name]
+    [validation]
+        [required _value=bool:true /]
+    [/validation]
+[/@new]
+```
+- For AwesomeEnterprise service names
+- Monospace font
+- Service name validation
+
+### Awesome Code Field
+```awesome
+[@new]
+    [type]awesome_code[/type]
+    [name]code-block[/name]
+    [label]Awesome Code[/label]
+    [attr_name]block.code[/attr_name]
+[/@new]
+```
+- Monospace font textarea
+- For AwesomeEnterprise code blocks
+- Multi-line editing
+
+### Environment Path Field
+```awesome
+[@new]
+    [type]env_path[/type]
+    [name]env-path[/name]
+    [label]Environment Path[/label]
+    [attr_name]block.path[/attr_name]
+[/@new]
+```
+- For environment path references
+- Monospace font
+- Path validation
+
+## Block Configuration
+
+Blocks are configured using a declarative structure that defines:
+- Block metadata (name, title, icon, category)
+- Tabs for organizing fields
+- Fields within each tab
+
+### Configuration Structure
+```awesome
+[config]
+    [name]block-name[/name]
+    [title]Block Title[/title]
+    [icon]dashicon-name[/icon]
+    [category]widgets[/category]
+    
+    [tabs]
+        [@new]
+            [name]tab-name[/name]
+            [title]Tab Title[/title]
+            [icon]tab-icon[/icon]
+            [fields]
+                [@new]
+                    [type]field-type[/type]
+                    [name]field-name[/name]
+                    [label]Field Label[/label]
+                    [attr_name]attribute.path[/attr_name]
+                    // Optional configuration
+                    [default]default value[/default]
+                    [validation]
+                        [required _value=bool:true /]
+                        // Other validation rules
+                    [/validation]
+                [/@new]
+            [/fields]
+        [/@new]
+    [/tabs]
+[/config]
+```
+
+### Field Configuration Options
+Each field can include:
+- **type**: Required field type
+- **name**: Unique identifier
+- **label**: Display label
+- **attr_name**: Output attribute path
+- **default**: Default value (optional)
+- **validation**: Validation rules (optional)
+- **options**: For select fields (optional)
+
+## Block Registration
+
+Register blocks using the `gb.register` service:
+
+```awesome
+[gb.register block-name]
+    [config]
+        // Block configuration
+    [/config]
+    [render service=rendering-service /]
+[/gb.register]
+```
+
+The rendering service will receive all block attributes in `func.atts`.
+
+## Block Rendering
+
+Create rendering functions using `func.add`:
+
+```awesome
+[func.add function-name namespace=namespace]
+    // Access attributes via func.atts
+    // Render block content
+[/func.add]
+
+// Register as service
+[func.service.create service-name func=function-name namespace=namespace /]
+```
+
+### Available Attributes
+Block attributes are available in `func.atts` with the structure defined by your `attr_name` paths:
+
+```awesome
+[func.atts]
+    [tab1]
+        [title]Title value[/title]
+        [content]Inner blocks content[/content]
+    [/tab1]
+[/func.atts]
+```
+
+## Best Practices
+
+1. **Organization**
+   - Group related fields in tabs
+   - Use clear, descriptive names
+   - Organize complex blocks into multiple tabs
+
+2. **Field Types**
+   - Use appropriate field types for data
+   - Leverage validation rules
+   - Consider default values
+
+3. **Attributes**
+   - Use structured attribute paths
+   - Group related attributes
+   - Follow consistent naming
+
+4. **Performance**
+   - Use fields judiciously
+   - Consider block complexity
+   - Optimize rendering functions
+
+## Complete Example
+
+Here's a complete example of a query block with multiple field types:
+
+```awesome
+[gb.register query-block]
+    [config]
+        [name]query-block[/name]
+        [title]Database Query Block[/title]
+        [icon]database[/icon]
+        [category]widgets[/category]
+        
+        [tabs]
+            [@new]
+                [name]basic[/name]
+                [title]Basic Settings[/title]
+                [icon]admin-settings[/icon]
+                [fields]
+                    [@new]
+                        [type]title[/type]
+                        [name]title[/name]
+                        [label]Block Title[/label]
+                        [attr_name]basic.title[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]purpose[/type]
+                        [name]purpose[/name]
+                        [label]Block Purpose[/label]
+                        [attr_name]basic.purpose[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+            [@new]
+                [name]query[/name]
+                [title]Query Settings[/title]
+                [icon]editor-code[/icon]
+                [fields]
+                    [@new]
+                        [type]service[/type]
+                        [name]query-service[/name]
+                        [label]Query Service[/label]
+                        [attr_name]query.service[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]query[/type]
+                        [name]main-query[/name]
+                        [label]SQL Query[/label]
+                        [attr_name]query.sql[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]env_path[/type]
+                        [name]result-path[/name]
+                        [label]Result Path[/label]
+                        [attr_name]query.result_path[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]date[/type]
+                        [name]run-date[/name]
+                        [label]Run Date[/label]
+                        [attr_name]query.run_date[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]awesome_code[/type]
+                        [name]post-process[/name]
+                        [label]Post Processing Code[/label]
+                        [attr_name]query.post_process[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+        [/tabs]
+    [/config]
+    [render service=query.render /]
+[/gb.register]
+
+[func.add render namespace=query]
+    // Render logic here accessing func.atts
+[/func.add]
+
+[func.service.create query.render func=render namespace=query /]
+```
+
+## Complete Examples
+
+### 1. Conditional Block
+This example shows a block with condition, then, and else sections:
+
+```awesome
+[gb.register cond-block]
+    [config]
+        [name]cond-block[/name]
+        [title]Conditional Block[/title]
+        [icon]admin-generic[/icon]
+        [category]widgets[/category]
+        
+        [tabs]
+            [@new]
+                [name]when-block[/name]
+                [title]When[/title]
+                [icon]filter[/icon]
+                [fields]
+                    [@new]
+                        [type]text[/type]
+                        [name]when-service[/name]
+                        [label]When Service[/label]
+                        [attr_name]when.service[/attr_name]
+                    [/@new]
+                    [@new]
+                        [type]attributes-repeater[/type]
+                        [name]when-attributes[/name]
+                        [label]When Attributes[/label]
+                        [attr_name]when.attributes[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+
+            [@new]
+                [name]then-block[/name]
+                [title]Then[/title]
+                [icon]yes[/icon]
+                [fields]
+                    [@new]
+                        [type]innerblocks[/type]
+                        [name]then-content[/name]
+                        [label]Then Content[/label]
+                        [attr_name]then.content[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+
+            [@new]
+                [name]else-block[/name]
+                [title]Else[/title]
+                [icon]no[/icon]
+                [fields]
+                    [@new]
+                        [type]innerblocks[/type]
+                        [name]else-content[/name]
+                        [label]Else Content[/label]
+                        [attr_name]else.content[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+        [/tabs]
+    [/config]
+    [render service=cond.then_else /]
+[/gb.register]
+
+// Rendering Function
+[func.add then_else namespace=aw2.cond]
+    [service.run 
+        service=get:func.atts.when.service 
+        atts:path=func.atts.when.attributes 
+        out:@set=func.reply 
+    /]
+
+    [cond.block.@check cond.@=bool.is.true cond.main=get:func.reply]
+        [@check.then]
+            [gb.render.blocks {func.atts.then.content} /]
+        [/@check.then]
+        [@check.else]
+            [gb.render.blocks {func.atts.else.content} /]
+        [/@check.else]
+    [/cond.block.@check]
+[/func.add]
+
+[func.service.create cond.then_else func=then_else namespace=aw2.cond /]
+```
+
+### 2. Query Block
+Simple block for database queries:
+
+```awesome
+[gb.register category-query]
+    [config]
+        [name]category-query[/name]
+        [title]Query to Get Categories[/title]
+        [icon]database[/icon]
+        [category]widgets[/category]
+        
+        [tabs]
+            [@new]
+                [name]query[/name]
+                [title]Query[/title]
+                [icon]editor-table[/icon]
+                [fields]
+                    [@new]
+                        [type]textarea[/type]
+                        [name]query[/name]
+                        [label]Category Query[/label]
+                        [attr_name]query.category[/attr_name]
+                    [/@new]
+                [/fields]
+            [/@new]
+        [/tabs]
+    [/config]
+    [render service=category.query /]
+[/gb.register]
+```
